@@ -1,0 +1,34 @@
+[project]
+name = "agile-team"
+version = "0.1.0"
+description = "MCP server for agile team with model wrapper tools"
+authors = [
+    {name = "Agile Team", email = "agile@example.com"},
+]
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "MIT"}
+dependencies = [
+    "mcp>=1.6.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "openai>=1.0.0",
+    "anthropic>=0.7.0",
+    "google-generativeai>=0.3.0",
+    "requests>=2.31.0",
+]
+
+[project.scripts]
+agile-team = "agile_team.main:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["agile_team"]
+
+[tool.pytest]
+testpaths = ["src/agile_team/tests"]
+python_files = "test_*.py"

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "agile-team": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run",
+        "agile-team"
+      ],
+      "env": {}
+    }
+  }
+}

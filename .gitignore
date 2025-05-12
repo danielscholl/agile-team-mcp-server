@@ -60,3 +60,4 @@ dmypy.json
 *.swp
 *.swo
 .DS_Store
+**/.claude/settings.local.json
