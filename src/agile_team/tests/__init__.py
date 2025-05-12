@@ -1,0 +1,1 @@
+"""Tests for the Agile Team MCP Server."""
