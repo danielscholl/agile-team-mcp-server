@@ -9,6 +9,7 @@ from agile_team.tools.prompt_from_file import prompt_from_file
 from agile_team.tools.prompt_from_file_to_file import prompt_from_file_to_file
 from agile_team.tools.list_providers import list_providers
 from agile_team.tools.list_models import list_models
+from agile_team.tools.decision_maker import decision_maker, DEFAULT_DECISION_MAKER_MODEL, DEFAULT_DECISION_PROMPT
 
 # Create a FastMCP server instance
 mcp = FastMCP("Agile Team MCP Server")
@@ -90,3 +91,36 @@ def list_models_tool(provider: str) -> List[str]:
         List of model names available for the specified provider
     """
     return list_models(provider)
+
+
+@mcp.tool()
+def decision_maker_tool(
+    from_file: str,
+    models_prefixed_by_provider: List[str],
+    output_dir: str = ".",
+    decision_maker_model: str = DEFAULT_DECISION_MAKER_MODEL, 
+    decision_prompt: str = DEFAULT_DECISION_PROMPT
+) -> str:
+    """
+    Generate responses from multiple LLM models and use a decision maker model to choose the best direction.
+    
+    This tool first sends a prompt from a file to multiple models, then uses a designated
+    decision maker model to evaluate all responses and provide a final decision.
+    
+    Args:
+        from_file: Path to the file containing the prompt text
+        models_prefixed_by_provider: List of team member models in format "provider:model"
+        output_dir: Directory where response files should be saved (defaults to current directory)
+        decision_maker_model: Model to use for making the decision (defaults to "openai:o3")
+        decision_prompt: Custom decision prompt template (if None, uses the default)
+    
+    Returns:
+        Path to the decision output file
+    """
+    return decision_maker(
+        from_file=from_file,
+        models_prefixed_by_provider=models_prefixed_by_provider,
+        output_dir=output_dir,
+        decision_maker_model=decision_maker_model,
+        decision_prompt=decision_prompt
+    )

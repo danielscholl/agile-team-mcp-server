@@ -166,6 +166,7 @@ list_providers_tool
 # List models for a specific provider
 list_models_tool: "openai"
 ```
+
 ### Work with Files
 
 Process prompts from files and save responses to files for batch processing.
@@ -177,4 +178,19 @@ prompt_from_file_tool: [o:o4-mini] "prompts/function.txt"
 # Save responses to files
 prompt_from_file_to_file_tool: [o:o4-mini] "prompts/uv_script.txt" "prompts/responses/uv_script.py"
 prompt_from_file_to_file_tool: [a:claude-3-sonnet] "prompts/diagram_request.txt" output_extension="md"
+```
+
+### Team Decision Making
+
+Use multiple models as a team to generate different solutions, then have a decision maker model evaluate and choose the best approach.
+
+```bash
+# Basic team decision making
+decision_maker_tool: "prompts/problem.txt" ["o:o4", "a:claude-3-sonnet", "g:gemini-2.5-pro"]
+
+# Custom decision maker model
+decision_maker_tool: "prompts/strategy.txt" ["o:o4", "a:claude-3-sonnet", "g:gemini-2.5-pro"] decision_maker_model="a:claude-3-7-sonnet-20250219"
+
+# Specify output directory
+decision_maker_tool: "prompts/design.txt" ["o:o4", "a:claude-3-sonnet", "g:gemini-2.5-pro"] output_dir="./decisions"
 ```
