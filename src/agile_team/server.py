@@ -46,7 +46,8 @@ def prompt_from_file_tool(file: str, models_prefixed_by_provider: List[str]) -> 
 
 @mcp.tool()
 def prompt_from_file_to_file_tool(
-    file: str, models_prefixed_by_provider: List[str], output_dir: str = "."
+    file: str, models_prefixed_by_provider: List[str], output_dir: str = None, 
+    output_extension: str = None, output_path: str = None
 ) -> List[str]:
     """
     Read a prompt from a file, send it to multiple LLM models, and write responses to files.
@@ -54,12 +55,16 @@ def prompt_from_file_to_file_tool(
     Args:
         file: Path to the file containing the prompt text
         models_prefixed_by_provider: List of models in format "provider:model" (e.g., "openai:gpt-4")
-        output_dir: Directory where response files should be saved (default: current directory)
+        output_dir: Directory where response files should be saved (defaults to input file's directory if not specified)
+        output_extension: File extension for output files (e.g., 'py', 'txt', 'md')
+                          If None, defaults to 'txt' (default: None)
+        output_path: Optional full output path with filename. If provided, the extension
+                     from this path will be used (overrides output_extension).
     
     Returns:
         List of file paths where responses were written
     """
-    return prompt_from_file_to_file(file, models_prefixed_by_provider, output_dir)
+    return prompt_from_file_to_file(file, models_prefixed_by_provider, output_dir, output_extension, output_path)
 
 
 @mcp.tool()

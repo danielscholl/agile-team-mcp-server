@@ -8,6 +8,7 @@
 - [ ] ⚠️ Build robust error handling for all possible failure scenarios
 - [ ] ⚠️ Ensure all tools are registered and callable via MCP in `server.py`
 - [ ] ⚠️ Validate and correct model/provider names using the "magic" weak_provider_and_model function
+- [ ] ⚠️ For OpenAI o-series models (o3-mini, o4-mini, o3), support reasoning effort suffixes (`:low`, `:medium`, `:high`). If present, route to a `prompt_with_thinking` function (see ai_docs/openai-reasoning-effort.md for details); otherwise, use the standard prompt function. Validate this feature with tests.
 
 ### Tool Details
 
@@ -47,6 +48,15 @@
   - API/network errors
 - For prompt tests, use: "What is the capital of France?" and expect "Paris" (case-insensitive)
 - For list_models/list_providers, verify expected output structure
+
+### OpenAI Reasoning Levels (o-series)
+
+For OpenAI o-series models (`o3-mini`, `o4-mini`, `o3`), support reasoning effort suffixes (`:low`, `:medium`, `:high`).
+- If a model is specified with one of these suffixes (e.g., `o4-mini:high`), route the prompt to a `prompt_with_thinking` function (see `ai_docs/openai-reasoning-effort.md` for details).
+- If no suffix is present, use the standard prompt function.
+- Suffix parsing and routing must be implemented and validated with tests.
+- Valid model names: `o4-mini:low`, `o4-mini:medium`, `o4-mini:high`, etc.
+- Add test coverage for all suffixes and fallback logic.
 
 ## Tools to Expose
 
