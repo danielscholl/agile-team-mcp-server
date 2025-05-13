@@ -9,7 +9,7 @@ from agile_team.tools.prompt_from_file import prompt_from_file
 from agile_team.tools.prompt_from_file_to_file import prompt_from_file_to_file
 from agile_team.tools.list_providers import list_providers
 from agile_team.tools.list_models import list_models
-from agile_team.tools.decision_maker import decision_maker, DEFAULT_DECISION_MAKER_MODEL, DEFAULT_DECISION_PROMPT
+from agile_team.tools.persona_dm import persona_dm, DEFAULT_PERSONA_DM_MODEL, DEFAULT_PERSONA_PROMPT
 
 # Default model for prompt tools
 DEFAULT_PROMPT_MODEL = ["openai:gpt-4o-mini"]
@@ -55,7 +55,7 @@ def prompt_from_file_tool(file_path: str, models_prefixed_by_provider: List[str]
 
 
 @mcp.tool()
-def prompt_from_file_to_file_tool(
+def prompt_from_file2file_tool(
     file_path: str, models_prefixed_by_provider: List[str] = None, output_dir: str = None, 
     output_extension: str = None, output_path: str = None
 ) -> List[str]:
@@ -106,14 +106,14 @@ def list_models_tool(provider: str) -> List[str]:
 
 
 @mcp.tool()
-def decision_maker_tool(
+def persona_dm_tool(
     from_file: str,
     models_prefixed_by_provider: List[str] = None,
     output_dir: str = None,
     output_extension: str = None,
     output_path: str = None,
-    decision_maker_model: str = DEFAULT_DECISION_MAKER_MODEL, 
-    decision_prompt: str = DEFAULT_DECISION_PROMPT
+    persona_dm_model: str = DEFAULT_PERSONA_DM_MODEL, 
+    persona_prompt: str = DEFAULT_PERSONA_PROMPT
 ) -> str:
     """
     Generate responses from multiple LLM models and use a decision maker model to choose the best direction.
@@ -127,19 +127,19 @@ def decision_maker_tool(
                                     (if None, defaults to ["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:gemini-2.5-pro"])
         output_dir: Directory where response files should be saved (defaults to input file's directory/responses)
         output_extension: File extension for output files (e.g., 'py', 'txt', 'md')
-        output_path: Optional full output path with filename for the decision document
-        decision_maker_model: Model to use for making the decision (defaults to "openai:o4-mini")
-        decision_prompt: Custom decision prompt template (if None, uses the default)
+        output_path: Optional full output path with filename for the persona document
+        persona_dm_model: Model to use for making the decision (defaults to "openai:o4-mini")
+        persona_prompt: Custom persona prompt template (if None, uses the default)
     
     Returns:
-        Path to the decision output file
+        Path to the persona output file
     """
-    return decision_maker(
+    return persona_dm(
         from_file=from_file,
         models_prefixed_by_provider=models_prefixed_by_provider,
         output_dir=output_dir,
         output_extension=output_extension,
         output_path=output_path,
-        decision_maker_model=decision_maker_model,
-        decision_prompt=decision_prompt
+        persona_dm_model=persona_dm_model,
+        persona_prompt=persona_prompt
     )

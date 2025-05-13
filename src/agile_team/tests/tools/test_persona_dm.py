@@ -1,20 +1,20 @@
-"""Tests for the decision maker tool."""
+"""Tests for the persona_dm tool."""
 
 import os
 import pytest
 from unittest.mock import patch, MagicMock
-from agile_team.tools.decision_maker import decision_maker
+from agile_team.tools.persona_dm import persona_dm
 from mcp.server.fastmcp.exceptions import ValidationError, ToolError, ResourceError
 
 
-@patch('agile_team.tools.decision_maker.os.makedirs')
-@patch('agile_team.tools.decision_maker.validate_directory_exists')
-@patch('agile_team.tools.decision_maker.prompt_from_file_to_file')
-@patch('agile_team.tools.decision_maker.read_file')
-@patch('agile_team.tools.decision_maker.validate_and_correct_models')
-@patch('agile_team.tools.decision_maker.prompt_model')
-@patch('agile_team.tools.decision_maker.write_file')
-def test_decision_maker_success(
+@patch('agile_team.tools.persona_dm.os.makedirs')
+@patch('agile_team.tools.persona_dm.validate_directory_exists')
+@patch('agile_team.tools.persona_dm.prompt_from_file_to_file')
+@patch('agile_team.tools.persona_dm.read_file')
+@patch('agile_team.tools.persona_dm.validate_and_correct_models')
+@patch('agile_team.tools.persona_dm.prompt_model')
+@patch('agile_team.tools.persona_dm.write_file')
+def test_persona_dm_success(
     mock_write_file, 
     mock_prompt_model, 
     mock_validate_models, 
@@ -23,7 +23,7 @@ def test_decision_maker_success(
     mock_validate_dir,
     mock_makedirs
 ):
-    """Test successful execution of the decision maker tool."""
+    """Test successful execution of the persona_dm tool."""
     # Set up mocks
     mock_prompt_from_file.return_value = [
         "/test/responses/test_openai_o4.txt",
@@ -40,14 +40,14 @@ def test_decision_maker_success(
     mock_makedirs.return_value = None  # Mock directory creation
     
     # Call the function
-    result = decision_maker(
+    result = persona_dm(
         from_file="/test/prompt.txt",
         models_prefixed_by_provider=["openai:o4", "anthropic:claude"],
-        decision_maker_model="openai:o3"
+        persona_dm_model="openai:o3"
     )
     
     # Assert the result
-    expected_path = "/test/responses/prompt_decision.md"
+    expected_path = "/test/responses/prompt_persona.md"
     assert result == expected_path
     
     # Validate calls
@@ -67,31 +67,31 @@ def test_decision_maker_success(
     assert mock_write_file.call_args[0][1] == "Decision: Approach B is better"
 
 
-@patch('agile_team.tools.decision_maker.validate_directory_exists')
-def test_decision_maker_validation_error(mock_validate_dir):
+@patch('agile_team.tools.persona_dm.validate_directory_exists')
+def test_persona_dm_validation_error(mock_validate_dir):
     """Test validation error when insufficient models are provided."""
     # Test with no models
     with pytest.raises(ValidationError):
-        decision_maker(from_file="test.txt", models_prefixed_by_provider=[])
+        persona_dm(from_file="test.txt", models_prefixed_by_provider=[])
     
     # Test with only one model
     with pytest.raises(ValidationError):
-        decision_maker(from_file="test.txt", models_prefixed_by_provider=["openai:o4"])
+        persona_dm(from_file="test.txt", models_prefixed_by_provider=["openai:o4"])
 
 
-@patch('agile_team.tools.decision_maker.os.makedirs')
-@patch('agile_team.tools.decision_maker.validate_directory_exists')
-@patch('agile_team.tools.decision_maker.prompt_from_file_to_file')
-@patch('agile_team.tools.decision_maker.read_file')
-@patch('agile_team.tools.decision_maker.validate_and_correct_models')
-def test_decision_maker_invalid_model(
+@patch('agile_team.tools.persona_dm.os.makedirs')
+@patch('agile_team.tools.persona_dm.validate_directory_exists')
+@patch('agile_team.tools.persona_dm.prompt_from_file_to_file')
+@patch('agile_team.tools.persona_dm.read_file')
+@patch('agile_team.tools.persona_dm.validate_and_correct_models')
+def test_persona_dm_invalid_model(
     mock_validate_models, 
     mock_read_file, 
     mock_prompt_from_file,
     mock_validate_dir,
     mock_makedirs
 ):
-    """Test error handling when an invalid decision maker model is provided."""
+    """Test error handling when an invalid persona model is provided."""
     # Set up mocks
     mock_prompt_from_file.return_value = [
         "/test/responses/test_openai_o4.txt",
@@ -102,23 +102,23 @@ def test_decision_maker_invalid_model(
     mock_validate_dir.return_value = None  # Mock the directory validation
     mock_makedirs.return_value = None  # Mock directory creation
     
-    # Test with invalid decision maker model
+    # Test with invalid persona model
     with pytest.raises(ValidationError):
-        decision_maker(
+        persona_dm(
             from_file="/test/prompt.txt",
             models_prefixed_by_provider=["openai:o4", "anthropic:claude"],
-            decision_maker_model="invalid:model"
+            persona_dm_model="invalid:model"
         )
 
 
-@patch('agile_team.tools.decision_maker.os.makedirs')
-@patch('agile_team.tools.decision_maker.validate_directory_exists')
-@patch('agile_team.tools.decision_maker.prompt_from_file_to_file')
-@patch('agile_team.tools.decision_maker.read_file')
-@patch('agile_team.tools.decision_maker.validate_and_correct_models')
-@patch('agile_team.tools.decision_maker.prompt_model')
-@patch('agile_team.tools.decision_maker.write_file')
-def test_decision_maker_prompt_error(
+@patch('agile_team.tools.persona_dm.os.makedirs')
+@patch('agile_team.tools.persona_dm.validate_directory_exists')
+@patch('agile_team.tools.persona_dm.prompt_from_file_to_file')
+@patch('agile_team.tools.persona_dm.read_file')
+@patch('agile_team.tools.persona_dm.validate_and_correct_models')
+@patch('agile_team.tools.persona_dm.prompt_model')
+@patch('agile_team.tools.persona_dm.write_file')
+def test_persona_dm_prompt_error(
     mock_write_file, 
     mock_prompt_model, 
     mock_validate_models, 
@@ -127,7 +127,7 @@ def test_decision_maker_prompt_error(
     mock_validate_dir,
     mock_makedirs
 ):
-    """Test error handling when the decision maker model fails."""
+    """Test error handling when the persona model fails."""
     # Set up mocks
     mock_prompt_from_file.return_value = [
         "/test/responses/test_openai_o4.txt",
@@ -143,27 +143,27 @@ def test_decision_maker_prompt_error(
     mock_validate_dir.return_value = None  # Mock the directory validation
     mock_makedirs.return_value = None  # Mock directory creation
     
-    # Test with error from the decision maker model
+    # Test with error from the persona model
     with pytest.raises(ToolError):
-        decision_maker(
+        persona_dm(
             from_file="/test/prompt.txt",
             models_prefixed_by_provider=["openai:o4", "anthropic:claude"],
-            decision_maker_model="openai:o3"
+            persona_dm_model="openai:o3"
         )
     
     # Should write an error file
     mock_write_file.assert_called_once()
-    assert "_decision_error" in mock_write_file.call_args[0][0]
+    assert "_persona_error" in mock_write_file.call_args[0][0]
 
 
-@patch('agile_team.tools.decision_maker.os.makedirs')
-@patch('agile_team.tools.decision_maker.validate_directory_exists')
-@patch('agile_team.tools.decision_maker.prompt_from_file_to_file')
-@patch('agile_team.tools.decision_maker.read_file')
-@patch('agile_team.tools.decision_maker.validate_and_correct_models')
-@patch('agile_team.tools.decision_maker.prompt_model')
-@patch('agile_team.tools.decision_maker.write_file')
-def test_decision_maker_with_custom_output_path(
+@patch('agile_team.tools.persona_dm.os.makedirs')
+@patch('agile_team.tools.persona_dm.validate_directory_exists')
+@patch('agile_team.tools.persona_dm.prompt_from_file_to_file')
+@patch('agile_team.tools.persona_dm.read_file')
+@patch('agile_team.tools.persona_dm.validate_and_correct_models')
+@patch('agile_team.tools.persona_dm.prompt_model')
+@patch('agile_team.tools.persona_dm.write_file')
+def test_persona_dm_with_custom_output_path(
     mock_write_file, 
     mock_prompt_model, 
     mock_validate_models, 
@@ -172,7 +172,7 @@ def test_decision_maker_with_custom_output_path(
     mock_validate_dir,
     mock_makedirs
 ):
-    """Test decision maker with custom output path."""
+    """Test persona_dm with custom output path."""
     # Set up mocks
     mock_prompt_from_file.return_value = [
         "/output/test_openai_o4.txt",
@@ -190,10 +190,10 @@ def test_decision_maker_with_custom_output_path(
     
     # Call the function with output_path
     custom_output_path = "/custom/path/final_decision.md"
-    result = decision_maker(
+    result = persona_dm(
         from_file="/test/prompt.txt",
         models_prefixed_by_provider=["openai:o4", "anthropic:claude"],
-        decision_maker_model="openai:o3",
+        persona_dm_model="openai:o3",
         output_path=custom_output_path
     )
     

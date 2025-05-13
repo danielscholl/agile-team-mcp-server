@@ -1,4 +1,4 @@
-"""Decision maker tool implementation."""
+"""Persona DM (Decision Maker) tool implementation."""
 
 import os
 from typing import List, Optional
@@ -9,14 +9,14 @@ from agile_team.shared.model_router import prompt_model
 from agile_team.shared.utils import read_file, write_file, validate_directory_exists
 from agile_team.tools.prompt_from_file_to_file import prompt_from_file_to_file
 
-# Default decision maker model
-DEFAULT_DECISION_MAKER_MODEL = "openai:o4-mini"
+# Default persona decision model
+DEFAULT_PERSONA_DM_MODEL = "openai:o4-mini"
 
 # Default team member models
 DEFAULT_TEAM_MODELS = ["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:gemini-2.5-pro"]
 
-# Default decision prompt template
-DEFAULT_DECISION_PROMPT = """
+# Default persona prompt template
+DEFAULT_PERSONA_PROMPT = """
 <purpose>
     You are the decision maker of the agile team. You are given a list of responses from your team members. Your job is to take in the original question prompt, and each of the team members' responses, and choose the best direction for the team.
 </purpose>
@@ -37,29 +37,29 @@ DEFAULT_DECISION_PROMPT = """
 """
 
 
-def decision_maker(
+def persona_dm(
     from_file: str,
     models_prefixed_by_provider: List[str] = None,
     output_dir: str = None,
     output_extension: str = None,
     output_path: str = None,
-    decision_maker_model: str = DEFAULT_DECISION_MAKER_MODEL,
-    decision_prompt: str = DEFAULT_DECISION_PROMPT
+    persona_dm_model: str = DEFAULT_PERSONA_DM_MODEL,
+    persona_prompt: str = DEFAULT_PERSONA_PROMPT
 ) -> str:
     """
-    Generate responses from multiple LLM models and then use a decision maker model to choose the best direction.
+    Generate responses from multiple LLM models and then use a persona decision model to choose the best direction.
     
     Args:
         from_file: Path to the file containing the prompt
         models_prefixed_by_provider: List of models in the format "provider:model" (if None, defaults to ["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:gemini-2.5-pro"])
         output_dir: Directory where response files should be saved (defaults to input file's directory/responses)
         output_extension: File extension for output files (e.g., '.py', '.txt', '.md')
-        output_path: Optional full output path with filename for the decision document
-        decision_maker_model: Model to use for making the decision
-        decision_prompt: Custom decision prompt template (if None, uses the default)
+        output_path: Optional full output path with filename for the persona document
+        persona_dm_model: Model to use for making the decision
+        persona_prompt: Custom persona prompt template (if None, uses the default)
         
     Returns:
-        Path to the decision output file
+        Path to the persona output file
     """
     # Use default models if none provided, or validate that enough models were provided
     if models_prefixed_by_provider is None:
@@ -123,28 +123,28 @@ def decision_maker(
             # Skip files that can't be read
             continue
     
-    # Prepare the decision prompt with the original prompt and team responses
-    final_decision_prompt = decision_prompt.format(
+    # Prepare the persona prompt with the original prompt and team responses
+    final_persona_prompt = persona_prompt.format(
         original_prompt=original_prompt,
         team_responses=team_responses_text
     )
     
-    # Validate and correct the decision maker model
-    validated_models = validate_and_correct_models([decision_maker_model])
+    # Validate and correct the persona model
+    validated_models = validate_and_correct_models([persona_dm_model])
     if not validated_models:
-        raise ValidationError(f"Invalid decision maker model: {decision_maker_model}")
+        raise ValidationError(f"Invalid persona model: {persona_dm_model}")
     
     # Extract the provider and model
     provider, model = validated_models[0]
     
     try:
-        # Get decision from the decision maker model
-        decision = prompt_model(provider, model, final_decision_prompt)
+        # Get decision from the persona model
+        decision = prompt_model(provider, model, final_persona_prompt)
         
-        # Handle the decision output path
+        # Handle the persona output path
         if output_path:
             # Use the exact path specified
-            decision_file_path = output_path
+            persona_file_path = output_path
             # Ensure parent directory exists
             os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
         else:
@@ -157,14 +157,14 @@ def decision_maker(
             base_filename = os.path.basename(from_file)
             file_name, _ = os.path.splitext(base_filename)
             
-            # Create the decision output filename
-            output_filename = f"{file_name}_decision{extension}"
-            decision_file_path = os.path.join(team_output_dir, output_filename)
+            # Create the persona output filename
+            output_filename = f"{file_name}_persona{extension}"
+            persona_file_path = os.path.join(team_output_dir, output_filename)
         
         # Write the decision to the output file
-        write_file(decision_file_path, decision)
+        write_file(persona_file_path, decision)
         
-        return decision_file_path
+        return persona_file_path
         
     except Exception as e:
         # Handle errors when getting a decision
@@ -184,7 +184,7 @@ def decision_maker(
             extension = ".md"
             if output_extension:
                 extension = output_extension if output_extension.startswith(".") else f".{output_extension}"
-            error_file_path = os.path.join(team_output_dir, f"{file_name}_decision_error{extension}")
+            error_file_path = os.path.join(team_output_dir, f"{file_name}_persona_error{extension}")
         
         # Ensure parent directory exists
         os.makedirs(os.path.dirname(error_file_path) or ".", exist_ok=True)
