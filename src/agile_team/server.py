@@ -1,7 +1,7 @@
 """MCP Server implementation for Agile Team."""
 
 from mcp.server.fastmcp import FastMCP
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 # Import tools
 from agile_team.tools.prompt import prompt
@@ -112,10 +112,10 @@ def list_models_tool(provider: str) -> List[str]:
 @mcp.tool()
 def persona_dm_tool(
     from_file: str,
-    models_prefixed_by_provider: List[str] = None,
-    output_dir: str = None,
-    output_extension: str = None,
-    output_path: str = None,
+    models_prefixed_by_provider: Optional[List[str]] = None,
+    output_dir: Optional[str] = None,
+    output_extension: Optional[str] = None,
+    output_path: Optional[str] = None,
     persona_dm_model: str = DEFAULT_DECISION_MAKER_MODEL, 
     persona_prompt: str = DEFAULT_PERSONA_PROMPT
 ) -> str:
@@ -152,12 +152,12 @@ def persona_dm_tool(
 @mcp.tool()
 def persona_ba_tool(
     from_file: str,
-    models_prefixed_by_provider: List[str] = None,
-    output_dir: str = None,
-    output_extension: str = None,
-    output_path: str = None,
+    models_prefixed_by_provider: Optional[List[str]] = None,
+    output_dir: Optional[str] = None,
+    output_extension: Optional[str] = None,
+    output_path: Optional[str] = None,
     use_decision_maker: bool = False,
-    decision_maker_models: List[str] = None,
+    decision_maker_models: Optional[List[str]] = None,
     ba_prompt: str = DEFAULT_BA_PROMPT,
     decision_maker_model: str = DEFAULT_DECISION_MAKER_MODEL,
     decision_maker_prompt: str = DEFAULT_PERSONA_PROMPT

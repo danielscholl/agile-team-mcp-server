@@ -1,6 +1,6 @@
 """Business Analyst persona implementation."""
 
-from typing import List
+from typing import List, Optional
 from agile_team.shared.config import DEFAULT_MODEL, DEFAULT_TEAM_MODELS, DEFAULT_DECISION_MAKER_MODEL
 from agile_team.tools.persona_base import persona_base
 from agile_team.tools.persona_dm import DEFAULT_PERSONA_PROMPT
@@ -63,12 +63,12 @@ DEFAULT_BA_PROMPT = """
 
 def persona_ba(
     from_file: str,
-    models_prefixed_by_provider: List[str] = None,
-    output_dir: str = None,
-    output_extension: str = None,
-    output_path: str = None,
+    models_prefixed_by_provider: Optional[List[str]] = None,
+    output_dir: Optional[str] = None,
+    output_extension: Optional[str] = None,
+    output_path: Optional[str] = None,
     use_decision_maker: bool = False,
-    decision_maker_models: List[str] = None,
+    decision_maker_models: Optional[List[str]] = None,
     ba_prompt: str = DEFAULT_BA_PROMPT,
     decision_maker_model: str = DEFAULT_DECISION_MAKER_MODEL,
     decision_maker_prompt: str = DEFAULT_PERSONA_PROMPT

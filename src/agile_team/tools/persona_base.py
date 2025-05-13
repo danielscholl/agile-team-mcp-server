@@ -16,12 +16,12 @@ def persona_base(
     persona_name: str,
     persona_prompt: str,
     from_file: str,
-    models_prefixed_by_provider: List[str] = None,
-    output_dir: str = None,
-    output_extension: str = None,
-    output_path: str = None,
+    models_prefixed_by_provider: Optional[List[str]] = None,
+    output_dir: Optional[str] = None,
+    output_extension: Optional[str] = None,
+    output_path: Optional[str] = None,
     use_decision_maker: bool = False,
-    decision_maker_models: List[str] = None,
+    decision_maker_models: Optional[List[str]] = None,
     decision_maker_model: str = DEFAULT_DECISION_MAKER_MODEL,
     decision_maker_prompt: str = DEFAULT_PERSONA_PROMPT
 ) -> str:

@@ -41,7 +41,7 @@ Required API keys in your `.env` file:
 # Required API keys
 OPENAI_API_KEY=your_openai_api_key_here
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
-GOOGLE_API_KEY=your_gemini_api_key_here  # For Gemini models
+GEMINI_API_KEY=your_gemini_api_key_here  # For Google Gemini models
 GROQ_API_KEY=your_groq_api_key_here
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
 OLLAMA_HOST=http://localhost:11434
@@ -75,7 +75,7 @@ To utilize this MCP server directly in other projects either use the buttons to 
       "env": {
         "OPENAI_API_KEY": "<YOUR_OPENAI_KEY>",
         "ANTHROPIC_API_KEY": "<YOUR_ANTHROPIC_KEY>",
-        "GOOGLE_API_KEY": "<YOUR_GEMINI_KEY>",
+        "GEMINI_API_KEY": "<YOUR_GEMINI_KEY>",
         "GROQ_API_KEY": "<YOUR_GROQ_KEY>",
         "DEEPSEEK_API_KEY": "<YOUR_DEEPSEEK_KEY>",
         "OLLAMA_HOST": "http://localhost:11434",
