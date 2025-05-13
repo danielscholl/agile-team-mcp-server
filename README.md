@@ -184,9 +184,9 @@ Process prompts from files and save responses to files for batch processing.
 prompt_from_file_tool: [a:claude-3-7-sonnet] "prompts/function.md"
 
 # Save responses to files
-prompt_from_file_to_file_tool: "prompts/uv_script.md"
-prompt_from_file_to_file_tool: [a:claude-3-7-sonnet] "prompts/uv_script.md" "prompts/responses/uv_script.py"
-prompt_from_file_to_file_tool: [a:claude-3-7-sonnet] "prompts/diagram_request.txt" output_extension="md"
+prompt_from_file2file_tool: "prompts/uv_script.md"
+prompt_from_file2file_tool: [a:claude-3-7-sonnet] "prompts/uv_script.md" "prompts/responses/uv_script.py"
+prompt_from_file2file_tool: [a:claude-3-7-sonnet] "prompts/diagram_request.txt" output_extension="md"
 ```
 
 ### Team Decision Making
@@ -194,9 +194,9 @@ prompt_from_file_to_file_tool: [a:claude-3-7-sonnet] "prompts/diagram_request.tx
 Use multiple models as team members to generate different solutions, then have a decision maker model evaluate and choose the best approach.
 
 > Default team member models: `["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:gemini-2.5-pro"]`
-> Default decision maker model: `openai:o4-mini`
+> Default persona decision model: `openai:o4-mini`
 
 ```bash
-decision_maker_tool: "prompts/decision.md" ["o:gpt-4.1", "a:claude-3-7-sonnet", "g:gemini-2.5-pro"] "o:o4-mini" "prompts/responses/final_decision.md"
+persona_dm_tool: "prompts/decision.md" ["o:gpt-4.1", "a:claude-3-7-sonnet", "g:gemini-2.5-pro"] "o:o4-mini" "prompts/responses/final_decision.md"
 ```
 

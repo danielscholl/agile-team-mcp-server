@@ -2,92 +2,96 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Commands
+## Repository Overview
 
-### Installation and Setup
+The Agile Team MCP Server is a service that provides a unified interface to multiple Large Language Model (LLM) providers. It allows sending prompts to various LLMs through a consistent API, handling model name validation and correction, and supports multiple tools for different workflows including team decision-making.
+
+## Setup and Installation
 
 ```bash
-# Clone and install
+# Clone the repository
 git clone https://github.com/danielscholl/agile-team-mcp-server.git
 cd agile-team-mcp-server
-uv sync
 
-# Install in development mode
+# Install dependencies using uv
+uv sync
 uv pip install -e .
 
-# Configure environment variables by copying template and editing
+# Setup environment variables for API keys
 cp .env.sample .env
-# Edit .env to add your API keys
+# Edit .env file with your API keys
 ```
 
-### Testing
+## Environment Configuration
+
+The server requires API keys for various LLM providers:
+
+```
+OPENAI_API_KEY=your_openai_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
+DEEPSEEK_API_KEY=your_deepseek_api_key_here
+OLLAMA_HOST=http://localhost:11434
+```
+
+## Development Commands
 
 ```bash
-# Run all tests
+# Run tests
 uv run pytest
 
-# Run tests for a specific module
-uv run pytest src/agile_team/tests/shared/test_model_router.py
+# Run tests with test coverage
+uv run pytest --cov=agile_team
 
-# Run a specific test
-uv run pytest src/agile_team/tests/shared/test_model_router.py::test_list_providers
-```
+# Run specific test file or test
+uv run pytest src/agile_team/tests/tools/test_prompt.py
+uv run pytest src/agile_team/tests/tools/test_prompt.py::test_prompt_basic
 
-### Running the Server
-
-```bash
-# Run the server locally
+# Run the MCP server
 uv run agile-team
 ```
 
-## Project Architecture
+## Architecture Overview
 
-This project is an MCP (Model Control Protocol) server that provides a unified interface to interact with multiple LLM providers. It serves as an intermediary between clients and various LLM services, standardizing the interface to access models from different providers.
+The project has the following structure:
 
-### Core Components
+1. **Server Layer**: Implemented in `server.py`, this creates a FastMCP server and registers MCP tools. It handles the HTTP interface and tool registration.
 
-1. **MCP Server Interface** (`server.py`): 
-   - Initializes a FastMCP server instance and registers tool functions that clients can use to interact with LLMs
-   - Provides tools for sending prompts, reading from files, and listing providers/models
+2. **Tool Layer**: Tools in the `tools/` directory implement specific functionalities:
+   - `prompt.py`: Sends text prompts to models
+   - `prompt_from_file.py`: Sends prompts from files
+   - `prompt_from_file_to_file.py`: Sends prompts from files and saves responses to files
+   - `list_providers.py`: Lists available LLM providers
+   - `list_models.py`: Lists available models for a provider
+   - `persona_dm.py`: Implements team decision-making with multiple LLMs
 
-2. **Model Router** (`shared/model_router.py`):
-   - Central component that routes requests to the appropriate provider
-   - Manages provider configuration and API key validation
-   - Provides dynamic model discovery
-   - Handles provider and model name corrections
+3. **Provider Layer**: In `shared/llm_providers/`, each file implements a provider interface:
+   - `openai.py`, `anthropic.py`, `gemini.py`, etc. handle API calls to specific providers
+   - Each provider has a `prompt()` function to send prompts to models
+   - Each provider implements provider-specific features (e.g., reasoning effort for OpenAI)
 
-3. **LLM Provider Implementations** (`shared/llm_providers/`):
-   - Separate modules for each supported provider (OpenAI, Anthropic, Gemini, etc.)
-   - Each provider module implements standard interfaces:
-     - `prompt()`: Send a prompt to a model and get a response
-     - `list_models()`: List available models for the provider
-   - Providers can also implement special features like extended thinking for Anthropic
+4. **Shared Services**:
+   - `model_router.py`: Routes requests to appropriate providers
+   - `validator.py`: Validates and corrects provider/model names
+   - `utils.py`: Common utilities
+   - `data_types.py`: Pydantic models for data validation
 
-4. **Tools** (`tools/`):
-   - Client-facing tools for interacting with LLMs:
-     - `prompt.py`: Send a prompt to one or more LLMs
-     - `prompt_from_file.py`: Read a prompt from a file and send it to LLMs
-     - `prompt_from_file_to_file.py`: Process a file and write responses to output files
-     - `list_providers.py`/`list_models.py`: Discovery tools for available providers/models
+## Key Design Patterns
 
-5. **Shared Utilities** (`shared/`):
-   - `data_types.py`: Pydantic models for request validation
-   - `utils.py`: Helper functions for file operations, model name parsing, etc.
-   - `validator.py`: Input validation and correction logic
+1. **Model Routing**: The `ModelRouter` class dynamically imports provider modules based on the requested provider name, enabling a clean separation between providers.
 
-### Provider Integration Pattern
+2. **Provider Normalization**: Short names like "o" are automatically mapped to full names like "openai", making the API user-friendly while maintaining internal consistency.
 
-The system follows a consistent pattern for integrating LLM providers:
+3. **Tool Registration**: Each MCP tool is registered with the FastMCP server using decorators, providing a clean interface for adding new tools.
 
-1. Define provider in `ModelProviders` enum (`data_types.py`)
-2. Configure provider in `PROVIDER_CONFIG` dictionary (`model_router.py`)
-3. Implement provider module with standard interface (`llm_providers/provider.py`)
-4. Provider module automatically loaded by `ModelRouter` when needed
+4. **Persona Decision Making**: The `persona_dm` tool implements a team decision-making pattern, where multiple LLMs generate responses and a decision-maker LLM chooses the best approach.
 
-### Special Features
+## Testing
 
-1. **Model Name Correction**: The system attempts to correct typos or variations in provider and model names
-2. **Thinking and Reasoning Control**: Support for controlling model reasoning through suffixes:
-   - Extended thinking for Claude (e.g., `claude-3-7-sonnet:4k`)
-   - Reasoning effort levels for some models (e.g., `model:high`)
-3. **File-Based Operations**: Tools to read prompts from files and write responses to files
+The test suite is organized to match the main code structure:
+- Tests for providers in `tests/shared/llm_providers/`
+- Tests for tools in `tests/tools/`
+- Tests for shared services in `tests/shared/`
+
+Many tests require valid API keys to run and will skip if the relevant keys are not available.
