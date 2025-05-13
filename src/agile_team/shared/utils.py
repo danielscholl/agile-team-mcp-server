@@ -9,7 +9,7 @@ import json
 SHORT_NAME_MAPPING = {
     "o": "openai",
     "a": "anthropic",
-    "g": "google",
+    "g": "gemini",
     "d": "deepseek",
     "q": "groq",
     "l": "ollama"
@@ -79,6 +79,35 @@ def parse_provider_model(provider_model: str) -> Tuple[str, str]:
     return provider, model
 
 
+def parse_reasoning_effort(model: str) -> Tuple[str, Optional[str]]:
+    """
+    Parse a model name to check for reasoning effort suffixes.
+    
+    Supported formats:
+    - model:low, model:medium, model:high
+    
+    Args:
+        model: The model name potentially with a reasoning suffix
+        
+    Returns:
+        Tuple of (base_model_name, reasoning_effort)
+        If no reasoning suffix is found or it's invalid, reasoning_effort will be None
+    """
+    if ":" not in model:
+        return model, None
+        
+    base_model, reasoning_level = model.split(":", 1)
+    
+    # Normalize reasoning level to lowercase
+    reasoning_level = reasoning_level.lower()
+    
+    # Validate reasoning level
+    if reasoning_level in ["low", "medium", "high"]:
+        return base_model, reasoning_level
+    else:
+        return base_model, None
+
+
 def weak_provider_and_model(provider: str, model: str, available_models: List[str]) -> Tuple[str, str]:
     """
     Attempt to correct provider and model names using fuzzy matching.
@@ -95,7 +124,7 @@ def weak_provider_and_model(provider: str, model: str, available_models: List[st
     provider_map = {
         "openai": ["openai", "o"],
         "anthropic": ["anthropic", "a"],
-        "google": ["google", "g"],
+        "gemini": ["gemini", "g"],
         "deepseek": ["deepseek", "d"],
         "groq": ["groq", "q"],
         "ollama": ["ollama", "l"],

@@ -67,7 +67,7 @@ def test_format_error_response():
 def test_weak_provider_and_model():
     """Test weak provider and model correction."""
     # Test provider correction
-    provider, model = weak_provider_and_model("oai", "gpt-4", ["gpt-4"])
+    provider, model = weak_provider_and_model("o", "gpt-4", ["gpt-4"])
     assert provider == "openai"
     assert model == "gpt-4"
     

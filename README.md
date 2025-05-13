@@ -149,25 +149,10 @@ prompt_tool: "ping"
 prompt_tool: "Analyze quantum computing applications" ["a:claude-3-7-sonnet-20250219:4k"]
 
 # OpenAI with high reasoning effort
-prompt_tool: "Solve this complex math problem" ["openai:o3-mini:high"]
+prompt_tool: "Write a function to calculate the factorial of a number" ["openai:o3-mini:high"]
 
 # Gemini with 8k thinking budget
 prompt_tool: "Evaluate climate change solutions" ["gemini:gemini-2.5-flash-preview-04-17:8k"]
-```
-
-Send text prompts to one or more LLM models and receive responses.
-
-```bash
-# Basic prompt with default model
-prompt_tool: "Your prompt text here"
-
-# Specify model(s)
-prompt_tool: "Your prompt text here" "openai:gpt-4o"
-
-# Examples with thinking capability
-prompt_tool: "Develop a strategy for learning how to create MCP Servers for AI" "anthropic:claude-3-7-sonnet-20250219:4k"
-
-prompt_tool: "Write a function to calculate the factorial of a number" "openai:o4-mini:high"
 ```
 
 ### List Available Options
@@ -187,8 +172,9 @@ Process prompts from files and save responses to files for batch processing.
 
 ```bash
 # Send prompt from file
-prompt-from-file: [o:o4-mini] "prompts/function.txt"
+prompt_from_file_tool: [o:o4-mini] "prompts/function.txt"
 
 # Save responses to files
-prompt-from-file-to-file: [o:o4-mini] "prompts/uv_script.txt" "prompts/responses"
+prompt_from_file_to_file_tool: [o:o4-mini] "prompts/uv_script.txt" "prompts/responses/uv_script.py"
+prompt_from_file_to_file_tool: [a:claude-3-sonnet] "prompts/diagram_request.txt" output_extension="md"
 ```

@@ -8,23 +8,23 @@ from agile_team.shared.model_router import prompt_model
 from agile_team.shared.utils import read_file
 
 
-def prompt_from_file(file: str, models_prefixed_by_provider: List[str]) -> List[str]:
+def prompt_from_file(file_path: str, models_prefixed_by_provider: List[str]) -> List[str]:
     """
     Read a prompt from a file and send it to multiple models.
     
     Args:
-        file: Path to the file containing the prompt
+        file_path: Path to the file containing the prompt
         models_prefixed_by_provider: List of models in the format "provider:model"
         
     Returns:
         List of responses, one per model
     """
     # Validate request
-    request = FilePromptRequest(file=file, models_prefixed_by_provider=models_prefixed_by_provider)
+    request = FilePromptRequest(file_path=file_path, models_prefixed_by_provider=models_prefixed_by_provider)
     
     # Read prompt from file
     try:
-        prompt_text = read_file(request.file)
+        prompt_text = read_file(request.file_path)
     except ResourceError as e:
         raise ResourceError(f"Failed to read prompt file: {str(e)}")
     
