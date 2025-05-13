@@ -9,44 +9,54 @@ from agile_team.tools.prompt_from_file import prompt_from_file
 from agile_team.tools.prompt_from_file_to_file import prompt_from_file_to_file
 from agile_team.tools.list_providers import list_providers
 from agile_team.tools.list_models import list_models
+from agile_team.tools.decision_maker import decision_maker, DEFAULT_DECISION_MAKER_MODEL, DEFAULT_DECISION_PROMPT
+
+# Default model for prompt tools
+DEFAULT_PROMPT_MODEL = ["openai:gpt-4o-mini"]
 
 # Create a FastMCP server instance
 mcp = FastMCP("Agile Team MCP Server")
 
 # Register tools using decorators
 @mcp.tool()
-def prompt_tool(text: str, models_prefixed_by_provider: List[str]) -> List[str]:
+def prompt_tool(text: str, models_prefixed_by_provider: List[str] = None) -> List[str]:
     """
     Send a text prompt to multiple LLM models and return their responses.
     
     Args:
         text: The prompt text to send to the models
-        models_prefixed_by_provider: List of models in format "provider:model" (e.g., "openai:gpt-4")
+        models_prefixed_by_provider: List of models in format "provider:model" (e.g., "openai:gpt-4").
+                                     If None, defaults to ["openai:gpt-4o-mini"]
     
     Returns:
         List of responses, one from each specified model
     """
+    if models_prefixed_by_provider is None:
+        models_prefixed_by_provider = DEFAULT_PROMPT_MODEL
     return prompt(text, models_prefixed_by_provider)
 
 
 @mcp.tool()
-def prompt_from_file_tool(file_path: str, models_prefixed_by_provider: List[str]) -> List[str]:
+def prompt_from_file_tool(file_path: str, models_prefixed_by_provider: List[str] = None) -> List[str]:
     """
     Read a prompt from a file and send it to multiple LLM models.
     
     Args:
         file_path: Path to the file containing the prompt text
-        models_prefixed_by_provider: List of models in format "provider:model" (e.g., "openai:gpt-4")
+        models_prefixed_by_provider: List of models in format "provider:model" (e.g., "openai:gpt-4").
+                                     If None, defaults to ["openai:gpt-4o-mini"]
     
     Returns:
         List of responses, one from each specified model
     """
+    if models_prefixed_by_provider is None:
+        models_prefixed_by_provider = DEFAULT_PROMPT_MODEL
     return prompt_from_file(file_path, models_prefixed_by_provider)
 
 
 @mcp.tool()
 def prompt_from_file_to_file_tool(
-    file_path: str, models_prefixed_by_provider: List[str], output_dir: str = None, 
+    file_path: str, models_prefixed_by_provider: List[str] = None, output_dir: str = None, 
     output_extension: str = None, output_path: str = None
 ) -> List[str]:
     """
@@ -54,16 +64,19 @@ def prompt_from_file_to_file_tool(
     
     Args:
         file_path: Path to the file containing the prompt text
-        models_prefixed_by_provider: List of models in format "provider:model" (e.g., "openai:gpt-4")
-        output_dir: Directory where response files should be saved (defaults to input file's directory if not specified)
+        models_prefixed_by_provider: List of models in format "provider:model" (e.g., "openai:gpt-4").
+                                     If None, defaults to ["openai:gpt-4o-mini"]
+        output_dir: Directory where response files should be saved (defaults to input file's directory/responses)
         output_extension: File extension for output files (e.g., 'py', 'txt', 'md')
-                          If None, defaults to 'txt' (default: None)
+                          If None, defaults to 'md' (default: None)
         output_path: Optional full output path with filename. If provided, the extension
                      from this path will be used (overrides output_extension).
     
     Returns:
         List of file paths where responses were written
     """
+    if models_prefixed_by_provider is None:
+        models_prefixed_by_provider = DEFAULT_PROMPT_MODEL
     return prompt_from_file_to_file(file_path, models_prefixed_by_provider, output_dir, output_extension, output_path)
 
 
@@ -90,3 +103,43 @@ def list_models_tool(provider: str) -> List[str]:
         List of model names available for the specified provider
     """
     return list_models(provider)
+
+
+@mcp.tool()
+def decision_maker_tool(
+    from_file: str,
+    models_prefixed_by_provider: List[str] = None,
+    output_dir: str = None,
+    output_extension: str = None,
+    output_path: str = None,
+    decision_maker_model: str = DEFAULT_DECISION_MAKER_MODEL, 
+    decision_prompt: str = DEFAULT_DECISION_PROMPT
+) -> str:
+    """
+    Generate responses from multiple LLM models and use a decision maker model to choose the best direction.
+    
+    This tool first sends a prompt from a file to multiple models, then uses a designated
+    decision maker model to evaluate all responses and provide a final decision.
+    
+    Args:
+        from_file: Path to the file containing the prompt text
+        models_prefixed_by_provider: List of team member models in format "provider:model" 
+                                    (if None, defaults to ["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:gemini-2.5-pro"])
+        output_dir: Directory where response files should be saved (defaults to input file's directory/responses)
+        output_extension: File extension for output files (e.g., 'py', 'txt', 'md')
+        output_path: Optional full output path with filename for the decision document
+        decision_maker_model: Model to use for making the decision (defaults to "openai:o4-mini")
+        decision_prompt: Custom decision prompt template (if None, uses the default)
+    
+    Returns:
+        Path to the decision output file
+    """
+    return decision_maker(
+        from_file=from_file,
+        models_prefixed_by_provider=models_prefixed_by_provider,
+        output_dir=output_dir,
+        output_extension=output_extension,
+        output_path=output_path,
+        decision_maker_model=decision_maker_model,
+        decision_prompt=decision_prompt
+    )

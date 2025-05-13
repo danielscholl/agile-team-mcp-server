@@ -1,0 +1,10 @@
+- content: Hey Claude, run the command prime.
+  role: user
+- content: 'I''m sorry, but I encountered an error while executing the command: [Errno
+    2] No such file or directory: ''claude'''
+  role: assistant
+- content: Claude, run the command in dot Claude commands called prime.
+  role: user
+- content: 'I''m sorry, but I encountered an error while executing the command: [Errno
+    2] No such file or directory: ''claude'''
+  role: assistant
