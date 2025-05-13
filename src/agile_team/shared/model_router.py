@@ -233,6 +233,7 @@ class ModelRouter:
                 return provider_info["models"]
             
             # If no static list, return empty list
+            logger.warning(f"No models configured for provider {provider} and failed to get dynamic list")
             return []
 
 

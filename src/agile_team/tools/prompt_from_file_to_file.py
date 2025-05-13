@@ -10,7 +10,7 @@ from agile_team.shared.utils import read_file, write_file, validate_directory_ex
 
 
 def prompt_from_file_to_file(
-    file: str, 
+    file_path: str, 
     models_prefixed_by_provider: List[str], 
     output_dir: str = None,
     output_extension: str = None,
@@ -20,7 +20,7 @@ def prompt_from_file_to_file(
     Read a prompt from a file, send it to multiple models, and write responses to files.
     
     Args:
-        file: Path to the file containing the prompt
+        file_path: Path to the file containing the prompt
         models_prefixed_by_provider: List of models in the format "provider:model"
         output_dir: Directory where response files should be saved (defaults to input file's directory)
         output_extension: File extension for output files (e.g., '.py', '.txt', '.md')
@@ -37,11 +37,11 @@ def prompt_from_file_to_file(
         output_dir = os.path.dirname(output_path) or "."
     # Handle case with no output_dir specified (use input file's directory)
     elif output_dir is None:
-        output_dir = os.path.dirname(file) or "."
+        output_dir = os.path.dirname(file_path) or "."
         
     # Validate request
     request = FileToFilePromptRequest(
-        file=file, 
+        file_path=file_path, 
         models_prefixed_by_provider=models_prefixed_by_provider,
         output_dir=output_dir,
         output_extension=output_extension,
@@ -50,7 +50,7 @@ def prompt_from_file_to_file(
     
     # Read prompt from file
     try:
-        prompt_text = read_file(request.file)
+        prompt_text = read_file(request.file_path)
     except ResourceError as e:
         raise ResourceError(f"Failed to read prompt file: {str(e)}")
     
@@ -64,7 +64,7 @@ def prompt_from_file_to_file(
         raise ResourceError(f"Invalid output directory: {str(e)}")
     
     # Get base filename from input file
-    base_filename = os.path.basename(request.file)
+    base_filename = os.path.basename(request.file_path)
     file_name, _ = os.path.splitext(base_filename)
     
     # Determine file extension to use

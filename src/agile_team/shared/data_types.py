@@ -72,7 +72,7 @@ class PromptRequest(ProviderModelRequest):
 
 class FilePromptRequest(ProviderModelRequest):
     """Request model for file-based prompt operations."""
-    file: str = Field(description="Path to the file containing the prompt")
+    file_path: str = Field(description="Path to the file containing the prompt")
 
 
 class FileToFilePromptRequest(FilePromptRequest):
