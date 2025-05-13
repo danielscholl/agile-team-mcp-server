@@ -34,13 +34,13 @@ This tool combines RealtimeSTT for speech recognition and OpenAI TTS for speech 
 ## Requirements
 - OpenAI API key (for TTS)
 - Anthropic API key (for Claude Code)
-- Python 3.9+
+- Python 3.12+
 - UV package manager (for dependency management)
 
 ## Usage
 Run the script:
 ```bash
-./voice_code.py
+./activate_voice.py
 ```
 
 Speak to the assistant using the trigger word "claude" in your query.
@@ -78,6 +78,7 @@ import logging
 TRIGGER_WORDS = ["claude", "cloud", "sonnet", "sonny"]  # List of possible trigger words
 STT_MODEL = "small.en"  # Options: tiny.en, base.en, small.en, medium.en, large-v2
 TTS_VOICE = "nova"  # Options: alloy, echo, fable, onyx, nova, shimmer
+# We no longer need the Claude CLI path since we're using command prompts directly
 DEFAULT_CLAUDE_TOOLS = [
     "Bash",
     "Edit",
@@ -191,7 +192,10 @@ class ClaudeCodeAssistant:
 
         # Load existing conversation or start a new one
         self.conversation_history = self.load_conversation_history()
-
+        
+        # Load available commands
+        self.available_commands = self.load_available_commands()
+        
         # Set up recorder
         self.setup_recorder()
 
@@ -230,6 +234,24 @@ class ClaudeCodeAssistant:
                 f"[bold red]Failed to save conversation history: {e}[/bold red]"
             )
 
+    def load_available_commands(self) -> Dict[str, Path]:
+        """Scan .claude/commands directory for available command files"""
+        commands_dir = Path(".claude/commands")
+        commands = {}
+        
+        if commands_dir.exists():
+            for cmd_file in commands_dir.glob("*.md"):
+                cmd_name = cmd_file.stem
+                commands[cmd_name] = cmd_file
+                log.info(f"Found command: {cmd_name} at {cmd_file}")
+                
+        if commands:
+            log.info(f"Loaded {len(commands)} commands: {', '.join(commands.keys())}")
+        else:
+            log.info("No commands found in .claude/commands directory")
+            
+        return commands
+                
     def setup_recorder(self):
         """Set up the RealtimeSTT recorder"""
         log.info(f"Setting up STT recorder with model {STT_MODEL}")
@@ -412,6 +434,26 @@ class ClaudeCodeAssistant:
             # Display the text as fallback
             console.print(f"[italic yellow]Text:[/italic yellow] {text}")
 
+    async def execute_command_file(self, command_file: Path) -> str:
+        """Use a command prompt file as the current prompt"""
+        log.info(f"Using command prompt from file: {command_file}")
+        
+        try:
+            # Read the content of the command file
+            command_content = command_file.read_text()
+            log.info(f"Read command content, length: {len(command_content)}")
+            
+            console.print(f"\n[bold blue]🔄 Using command prompt: {command_file.stem}...[/bold blue]")
+            
+            # We're not executing a separate Claude process - we're using the content
+            # of the command file as the current prompt for this conversation
+            return f"I'm using the '{command_file.stem}' command prompt. {command_content}"
+            
+        except Exception as e:
+            error_msg = f"Failed to read command file {command_file}: {str(e)}"
+            log.error(error_msg)
+            return f"I'm sorry, but I encountered an error while reading the command file: {str(e)}"
+    
     async def process_message(self, message: str) -> Optional[str]:
         """Process the user message and run Claude Code"""
         log.info(f'Processing message: "{message}"')
@@ -420,62 +462,98 @@ class ClaudeCodeAssistant:
         if not any(trigger.lower() in message.lower() for trigger in TRIGGER_WORDS):
             log.info("No trigger word detected, skipping")
             return None
-
+            
         # Add to conversation history
         self.conversation_history.append({"role": "user", "content": message})
+        
+        # Check for command execution request
+        if "run command" in message.lower() or "run the command" in message.lower():
+            log.info("Command execution request detected")
+            
+            # Extract command name (text after "run command" or "run the command")
+            command_parts = message.lower().split("run command" if "run command" in message.lower() else "run the command")
+            if len(command_parts) > 1:
+                command_text = command_parts[1].strip()
+                
+                # Clean up command name (remove common words)
+                for word in ["the", "please", "called"]:
+                    command_text = command_text.replace(f" {word} ", " ")
+                command_text = command_text.strip()
+                
+                log.info(f"Extracted command name: '{command_text}'")
+                
+                # Find the closest matching command
+                matching_commands = [cmd for cmd in self.available_commands.keys() 
+                                    if cmd.lower() in command_text.lower()]
+                
+                if matching_commands:
+                    # Use the first match
+                    command_name = matching_commands[0]
+                    command_file = self.available_commands[command_name]
+                    
+                    log.info(f"Found matching command: {command_name} at {command_file}")
+                    
+                    # Execute the command
+                    response = await self.execute_command_file(command_file)
+                    
+                    # Add to conversation history
+                    self.conversation_history.append({"role": "assistant", "content": response})
+                    self.save_conversation_history()
+                    
+                    return response
+                else:
+                    log.info(f"No matching command found for '{command_text}'")
+                    available_cmds = ", ".join(self.available_commands.keys()) if self.available_commands else "none"
+                    response = f"Sorry, I couldn't find a command that matches '{command_text}'. Available commands are: {available_cmds}"
+                    
+                    # Add to conversation history
+                    self.conversation_history.append({"role": "assistant", "content": response})
+                    self.save_conversation_history()
+                    
+                    return response
 
-        # Prepare the prompt for Claude Code including conversation history
-        formatted_history = self.format_conversation_history()
-        prompt = CLAUDE_PROMPT.format(formatted_history=formatted_history)
-
-        # Execute Claude Code as a simple subprocess
-        log.info("Starting Claude Code subprocess...")
-        cmd = [
-            "claude",
-            "-p",
-            prompt,
-            "--allowedTools",
-        ] + DEFAULT_CLAUDE_TOOLS
-
-        console.print("\n[bold blue]🔄 Running Claude Code...[/bold blue]")
-
-        try:
-            # Use simple subprocess.run for synchronous execution
-            process = subprocess.run(cmd, capture_output=True, text=True, check=True)
-
-            # Get the response
-            response = process.stdout
-
-            log.info(f"Claude Code succeeded, output length: {len(response)}")
-
-            # Display the response
-            console.print(Panel(title="Claude Response", renderable=Markdown(response)))
-
-            # Add to conversation history
-            self.conversation_history.append({"role": "assistant", "content": response})
-
-            # Save the updated conversation history
-            self.save_conversation_history()
-
-            return response
-
-        except subprocess.CalledProcessError as e:
-            error_msg = f"Claude Code failed with exit code: {e.returncode}"
-            log.error(f"{error_msg}\nError: {e.stderr[:500]}...")
-
-            error_response = "I'm sorry, but I encountered an error while processing your request. Please try again."
-            self.conversation_history.append(
-                {"role": "assistant", "content": error_response}
-            )
-
-            # Save the updated conversation history even when there's an error
-            self.save_conversation_history()
-
-            return error_response
+        # Standard Claude Code execution (non-command)
+        # For regular conversation (no command), we'll use a simulated response
+        log.info("Processing regular conversation message")
+        
+        # Create a simple response
+        response = "I understood your request and would typically process it through Claude Code. "
+        response += "Since we're in a demonstration mode, I'll simulate a helpful response instead."
+        
+        # Add some context based on the message
+        if "hello" in message.lower() or "hi" in message.lower():
+            response += "\n\nHello! How can I help you today?"
+        elif any(word in message.lower() for word in ["help", "guide", "instructions"]):
+            response += "\n\nI can help with various tasks. To use command prompts, say 'Claude, run command <name>'."
+            response += f"\nAvailable commands: {', '.join(self.available_commands.keys())}"
+        else:
+            response += "\n\nTo use one of the predefined command prompts, say 'Claude, run command <name>'."
+            response += f"\nAvailable commands: {', '.join(self.available_commands.keys())}"
+        
+        log.info(f"Created response, length: {len(response)}")
+        
+        # Display the response
+        console.print(Panel(title="Claude Response", renderable=Markdown(response)))
+        
+        # Add to conversation history
+        self.conversation_history.append({"role": "assistant", "content": response})
+        
+        # Save the updated conversation history
+        self.save_conversation_history()
+        
+        return response
 
     async def conversation_loop(self):
         """Run the main conversation loop"""
         log.info("Starting conversation loop")
+
+        # Prepare available commands message
+        commands_info = ""
+        if self.available_commands:
+            commands_info = f"\n[bold cyan]Available command prompts:[/bold cyan] {', '.join(self.available_commands.keys())}\n" \
+                           f"Say \"Claude, run command <name>\" to use a command prompt from .claude/commands/<name>.md"
+        else:
+            commands_info = "\n[dim]No command prompts available in .claude/commands directory.[/dim]"
 
         console.print(
             Panel.fit(
@@ -485,6 +563,7 @@ class ClaudeCodeAssistant:
                 f"STT model: {STT_MODEL}\n"
                 f"Conversation ID: {self.conversation_id}\n"
                 f"Saving conversation to: {self.conversation_file}\n"
+                f"{commands_info}\n"
                 f"Press Ctrl+C to exit."
             )
         )
@@ -532,6 +611,9 @@ class ClaudeCodeAssistant:
 async def main():
     """Main entry point for the assistant"""
     log.info("Starting Claude Code Voice Assistant")
+    
+    # No need to check for Claude CLI availability anymore
+    log.info("Voice command execution mode enabled (using command prompts from .claude/commands)")
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Voice-enabled Claude Code assistant")

@@ -22,9 +22,9 @@ def prompt_from_file_to_file(
     Args:
         file_path: Path to the file containing the prompt
         models_prefixed_by_provider: List of models in the format "provider:model"
-        output_dir: Directory where response files should be saved (defaults to input file's directory)
+        output_dir: Directory where response files should be saved (defaults to input file's directory/responses)
         output_extension: File extension for output files (e.g., '.py', '.txt', '.md')
-                         If None, defaults to '.txt'
+                         If None, defaults to '.md'
         output_path: Optional full output path with filename. If provided, the extension
                      from this path will be used (overrides output_extension).
         
@@ -35,9 +35,12 @@ def prompt_from_file_to_file(
     if output_path and output_dir is None:
         # Extract the directory from output_path to use as output_dir
         output_dir = os.path.dirname(output_path) or "."
-    # Handle case with no output_dir specified (use input file's directory)
+    # Handle case with no output_dir specified (use input file's directory/responses)
     elif output_dir is None:
-        output_dir = os.path.dirname(file_path) or "."
+        input_file_dir = os.path.dirname(file_path) or "."
+        output_dir = os.path.join(input_file_dir, "responses")
+        # Ensure the responses directory exists
+        os.makedirs(output_dir, exist_ok=True)
         
     # Validate request
     request = FileToFilePromptRequest(
@@ -68,7 +71,7 @@ def prompt_from_file_to_file(
     file_name, _ = os.path.splitext(base_filename)
     
     # Determine file extension to use
-    extension = ".txt"  # Default extension
+    extension = ".md"  # Default extension
     
     if request.output_path:
         # Extract extension from output_path if provided

@@ -138,7 +138,23 @@ mcp use agile-team
 
 ## Available Tools
 
+### List Available Options
+
+Check which providers and models are available for use.
+
+```bash
+# List all providers
+list_providers_tool
+
+# List models for a specific provider
+list_models_tool: "openai"
+```
+
 ### Send Prompts to Models
+
+Process prompts from input message.
+
+> Default decision maker model: `openai:o4-mini`
 
 **Usage examples:**
 ```bash
@@ -155,42 +171,32 @@ prompt_tool: "Write a function to calculate the factorial of a number" ["openai:
 prompt_tool: "Evaluate climate change solutions" ["gemini:gemini-2.5-flash-preview-04-17:8k"]
 ```
 
-### List Available Options
-
-Check which providers and models are available for use.
-
-```bash
-# List all providers
-list_providers_tool
-
-# List models for a specific provider
-list_models_tool: "openai"
-```
+- Default decision maker model: `openai:o4-mini`
 
 ### Work with Files
 
 Process prompts from files and save responses to files for batch processing.
 
+> Default decision maker model: `openai:o4-mini`
+
 ```bash
 # Send prompt from file
-prompt_from_file_tool: [o:o4-mini] "prompts/function.txt"
+prompt_from_file_tool: [a:claude-3-7-sonnet] "prompts/function.md"
 
 # Save responses to files
-prompt_from_file_to_file_tool: [o:o4-mini] "prompts/uv_script.txt" "prompts/responses/uv_script.py"
-prompt_from_file_to_file_tool: [a:claude-3-sonnet] "prompts/diagram_request.txt" output_extension="md"
+prompt_from_file_to_file_tool: "prompts/uv_script.md"
+prompt_from_file_to_file_tool: [a:claude-3-7-sonnet] "prompts/uv_script.md" "prompts/responses/uv_script.py"
+prompt_from_file_to_file_tool: [a:claude-3-7-sonnet] "prompts/diagram_request.txt" output_extension="md"
 ```
 
 ### Team Decision Making
 
-Use multiple models as a team to generate different solutions, then have a decision maker model evaluate and choose the best approach.
+Use multiple models as team members to generate different solutions, then have a decision maker model evaluate and choose the best approach.
+
+> Default team member models: `["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:gemini-2.5-pro"]`
+> Default decision maker model: `openai:o4-mini`
 
 ```bash
-# Basic team decision making
-decision_maker_tool: "prompts/problem.txt" ["o:o4", "a:claude-3-sonnet", "g:gemini-2.5-pro"]
-
-# Custom decision maker model
-decision_maker_tool: "prompts/strategy.txt" ["o:o4", "a:claude-3-sonnet", "g:gemini-2.5-pro"] decision_maker_model="a:claude-3-7-sonnet-20250219"
-
-# Specify output directory
-decision_maker_tool: "prompts/design.txt" ["o:o4", "a:claude-3-sonnet", "g:gemini-2.5-pro"] output_dir="./decisions"
+decision_maker_tool: "prompts/decision.md" ["o:gpt-4.1", "a:claude-3-7-sonnet", "g:gemini-2.5-pro"] "o:o4-mini" "prompts/responses/final_decision.md"
 ```
+

@@ -10,7 +10,10 @@ from agile_team.shared.utils import read_file, write_file, validate_directory_ex
 from agile_team.tools.prompt_from_file_to_file import prompt_from_file_to_file
 
 # Default decision maker model
-DEFAULT_DECISION_MAKER_MODEL = "openai:o3"
+DEFAULT_DECISION_MAKER_MODEL = "openai:o4-mini"
+
+# Default team member models
+DEFAULT_TEAM_MODELS = ["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:gemini-2.5-pro"]
 
 # Default decision prompt template
 DEFAULT_DECISION_PROMPT = """
@@ -36,8 +39,10 @@ DEFAULT_DECISION_PROMPT = """
 
 def decision_maker(
     from_file: str,
-    output_dir: str = ".",
     models_prefixed_by_provider: List[str] = None,
+    output_dir: str = None,
+    output_extension: str = None,
+    output_path: str = None,
     decision_maker_model: str = DEFAULT_DECISION_MAKER_MODEL,
     decision_prompt: str = DEFAULT_DECISION_PROMPT
 ) -> str:
@@ -46,26 +51,43 @@ def decision_maker(
     
     Args:
         from_file: Path to the file containing the prompt
-        output_dir: Directory where response files should be saved
-        models_prefixed_by_provider: List of models in the format "provider:model"
+        models_prefixed_by_provider: List of models in the format "provider:model" (if None, defaults to ["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:gemini-2.5-pro"])
+        output_dir: Directory where response files should be saved (defaults to input file's directory/responses)
+        output_extension: File extension for output files (e.g., '.py', '.txt', '.md')
+        output_path: Optional full output path with filename for the decision document
         decision_maker_model: Model to use for making the decision
         decision_prompt: Custom decision prompt template (if None, uses the default)
         
     Returns:
         Path to the decision output file
     """
-    # Validate that models were provided
-    if not models_prefixed_by_provider or len(models_prefixed_by_provider) < 2:
+    # Use default models if none provided, or validate that enough models were provided
+    if models_prefixed_by_provider is None:
+        models_prefixed_by_provider = DEFAULT_TEAM_MODELS
+    elif len(models_prefixed_by_provider) < 2:
         raise ValidationError("At least two team member models must be provided for decision making")
-
-    # Validate that output directory exists
-    validate_directory_exists(output_dir)
     
-    # First, generate team responses using prompt_from_file_to_file
+    # Handle path parameters based on input
+    if output_path and output_dir is None:
+        # Extract directory from output_path for team responses
+        team_output_dir = os.path.dirname(output_path) or "."
+    elif output_dir is None:
+        # Use from_file's directory + responses by default
+        input_file_dir = os.path.dirname(from_file) or "."
+        team_output_dir = os.path.join(input_file_dir, "responses")
+    else:
+        # Use provided output_dir
+        team_output_dir = output_dir
+        
+    # Ensure the team output directory exists
+    os.makedirs(team_output_dir, exist_ok=True)
+    
+    # First, generate team responses using prompt_from_file_to_file with explicit parameters
     team_responses_files = prompt_from_file_to_file(
         file_path=from_file,
         models_prefixed_by_provider=models_prefixed_by_provider,
-        output_dir=output_dir
+        output_dir=team_output_dir,
+        output_extension=output_extension
     )
     
     # Read the original prompt from the file
@@ -119,8 +141,25 @@ def decision_maker(
         # Get decision from the decision maker model
         decision = prompt_model(provider, model, final_decision_prompt)
         
-        # Create the decision output file path
-        decision_file_path = os.path.join(output_dir, "decision_maker_decision.md")
+        # Handle the decision output path
+        if output_path:
+            # Use the exact path specified
+            decision_file_path = output_path
+            # Ensure parent directory exists
+            os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+        else:
+            # Determine the file extension to use (.md by default)
+            extension = ".md"
+            if output_extension:
+                extension = output_extension if output_extension.startswith(".") else f".{output_extension}"
+                
+            # Extract base name from prompt file
+            base_filename = os.path.basename(from_file)
+            file_name, _ = os.path.splitext(base_filename)
+            
+            # Create the decision output filename
+            output_filename = f"{file_name}_decision{extension}"
+            decision_file_path = os.path.join(team_output_dir, output_filename)
         
         # Write the decision to the output file
         write_file(decision_file_path, decision)
@@ -130,6 +169,26 @@ def decision_maker(
     except Exception as e:
         # Handle errors when getting a decision
         error_message = f"Error getting decision from {provider}:{model}: {str(e)}"
-        error_file_path = os.path.join(output_dir, "decision_maker_error.md")
+        
+        # Determine error file path
+        if output_path:
+            # Create error file next to the specified output path
+            dir_path = os.path.dirname(output_path) or "."
+            base_name = os.path.basename(output_path)
+            name, ext = os.path.splitext(base_name)
+            error_file_path = os.path.join(dir_path, f"{name}_error{ext}")
+        else:
+            # Create standard error file in the team output directory
+            base_filename = os.path.basename(from_file)
+            file_name, _ = os.path.splitext(base_filename)
+            extension = ".md"
+            if output_extension:
+                extension = output_extension if output_extension.startswith(".") else f".{output_extension}"
+            error_file_path = os.path.join(team_output_dir, f"{file_name}_decision_error{extension}")
+        
+        # Ensure parent directory exists
+        os.makedirs(os.path.dirname(error_file_path) or ".", exist_ok=True)
+        
+        # Write error to file
         write_file(error_file_path, error_message)
         raise ToolError(error_message)
