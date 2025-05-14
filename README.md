@@ -165,9 +165,6 @@ Lists all supported LLM providers and their shortcut prefixes.
 ```bash
 # Simple example
 list_providers_tool
-
-# For structured output (advanced usage)
-list_providers_tool > providers.json
 ```
 
 #### List Models Tool
@@ -212,7 +209,7 @@ Send text prompts directly to LLM models and get their responses.
 prompt_tool: "Create a plan for implementing user authentication"
 
 # Complex example with multiple models and options
-prompt_tool: "Analyze the trade-offs between microservices and monoliths" ["openai:gpt-4.1:high", "anthropic:claude-3-7-sonnet:4k", "gemini:gemini-2.5-pro"]
+prompt_tool: "Analyze the trade-offs between microservices and monoliths" ["openai:gpt-4.1:high", "anthropic:claude-3-7-sonnet:4k"]
 ```
 
 ### Work with Files
@@ -234,7 +231,7 @@ Process prompts from files and save responses to files for batch processing.
 prompt_from_file_tool: "prompts/function.md"
 
 # Complex example with specific model
-prompt_from_file_tool: "prompts/function.md" ["anthropic:claude-3-7-sonnet-20250219:4k"]
+prompt_from_file_tool: "prompts/function.md" ["anthropic:claude-3-7-sonnet-20250219"]
 ```
 
 #### From File to File Tool
@@ -255,7 +252,7 @@ prompt_from_file_tool: "prompts/function.md" ["anthropic:claude-3-7-sonnet-20250
 prompt_from_file2file_tool: "prompts/uv_script.md"
 
 # Complex example with specific model, output path and custom extension
-prompt_from_file2file_tool: "prompts/diagram.md" ["anthropic:claude-3-7-sonnet"] "prompts/responses/architecture_diagram.svg" output_extension="svg"
+prompt_from_file2file_tool: "prompts/diagram.md" ["anthropic:claude-3-7-sonnet"] "prompts/responses/architecture_diagram.md"
 ```
 
 ### Team Decision Making
@@ -280,7 +277,7 @@ Use multiple models as team members to generate different solutions, then have a
 persona_dm_tool: "prompts/decision.md"
 
 # Complex example with custom team and decision maker model
-persona_dm_tool: "prompts/decision.md" ["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:gemini-2.5-pro"] persona_dm_model="anthropic:claude-3-7-sonnet" "prompts/responses/final_decision.md"
+persona_dm_tool: "prompts/decision.md" ["o:gpt-4.1", "a:claude-3-7-sonnet", "g:gemini-2.5-pro-preview-03-25"] persona_dm_model="o:o3" "prompts/responses/final_decision.md"
 ```
 
 ### Business Analyst Persona
@@ -309,8 +306,8 @@ Generate detailed business analysis using a specialized Business Analyst persona
 **Examples**:
 ```bash
 # Simple example
-persona_ba_tool: "prompts/product_requirements.md"
+persona_ba_tool: "prompts/concept.md"
 
 # Complex example with team-based decision making
-persona_ba_tool: "prompts/product_requirements.md" use_decision_maker=true decision_maker_model="anthropic:claude-3-7-sonnet" "prompts/responses/team_business_analysis.md"
+persona_ba_tool: "prompts/concept.md" use_decision_maker=true decision_maker_model="o:04-mini" "prompts/responses/concept_analysis.md"
 ```

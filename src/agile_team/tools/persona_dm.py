@@ -6,35 +6,17 @@ from mcp.server.fastmcp.exceptions import ValidationError, ToolError, ResourceEr
 from agile_team.shared.data_types import FileToFilePromptRequest
 from agile_team.shared.validator import validate_and_correct_models
 from agile_team.shared.model_router import prompt_model
-from agile_team.shared.utils import read_file, write_file, validate_directory_exists
+from agile_team.shared.utils import read_file, write_file, validate_directory_exists, load_prompt_file
 from agile_team.tools.prompt_from_file_to_file import prompt_from_file_to_file
 
 # Default persona decision model
 DEFAULT_PERSONA_DM_MODEL = "openai:o4-mini"
 
 # Default team member models
-DEFAULT_TEAM_MODELS = ["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:gemini-2.5-pro"]
+DEFAULT_TEAM_MODELS = ["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:emini-2.5-pro-preview-03-25"]
 
-# Default persona prompt template
-DEFAULT_PERSONA_PROMPT = """
-<purpose>
-    You are the decision maker of the agile team. You are given a list of responses from your team members. Your job is to take in the original question prompt, and each of the team members' responses, and choose the best direction for the team.
-</purpose>
-<instructions>
-    <instruction>Each team member has proposed an answer to the question posed in the prompt.</instruction>
-    <instruction>Given the original question prompt, and each of the team members' responses, choose the best answer.</instruction>
-    <instruction>Tally the votes of the team members, choose the best direction, and explain why you chose it.</instruction>
-    <instruction>To preserve anonymity, we will use model names instead of real names of your team members. When responding, use the model names in your response.</instruction>
-    <instruction>As a decision maker, you breakdown the decision into several categories including: risk, reward, timeline, and resources. In addition to these guiding categories, you also consider the team members' expertise and experience. As a bleeding edge decision maker, you also invent new dimensions of decision making to help you make the best decision for your company.</instruction>
-    <instruction>Your final decision maker response should be in markdown format with a comprehensive explanation of your decision. Start the top of the file with a title that says "Team Decision", include a table of contents, briefly describe the question/problem at hand then dive into several sections. One of your first sections should be a quick summary of your decision, then breakdown each of the team members' decisions into sections with your commentary on each. Where we lead into your decision with the categories of your decision making process, and then we lead into your final decision.</instruction>
-</instructions>
-
-<original-question>{original_prompt}</original-question>
-
-<team-decisions>
-{team_responses}
-</team-decisions>
-"""
+# Load prompt from file
+DEFAULT_PERSONA_PROMPT = load_prompt_file("dm_prompt.md")
 
 
 def persona_dm(
@@ -114,7 +96,15 @@ def persona_dm(
             response = read_file(response_file)
             
             # Add to the team responses section
-            team_responses_text += f"""<team-response>
+            # For backward compatibility - handle both analyst-documents and team-decisions format
+            if "<analyst-documents>" in persona_prompt:
+                team_responses_text += f"""<analyst-document>
+    <model-name>{model_info}</model-name>
+    <document>{response}</document>
+</analyst-document>
+"""
+            else:
+                team_responses_text += f"""<team-response>
     <model-name>{model_info}</model-name>
     <response>{response}</response>
 </team-response>
