@@ -306,8 +306,44 @@ Generate detailed business analysis using a specialized Business Analyst persona
 **Examples**:
 ```bash
 # Simple example
-persona_ba_tool: "prompts/concept.md"
+persona_ba_tool: "prompts/concept.md" "[g:gemini-2.5-pro-preview-03-25]" "prompts/responses/concept.md"
 
 # Complex example with team-based decision making
-persona_ba_tool: "prompts/concept.md" use_decision_maker=true decision_maker_model="o:04-mini" "prompts/responses/concept_analysis.md"
+persona_ba_tool: "prompts/concept.md" use_decision_maker=true decision_maker_model="o:04-mini" "prompts/responses/concept.md"
+```
+
+### Product Manager Persona
+
+Generate comprehensive product management plans using a specialized Product Manager persona, with optional team-based decision making.
+
+**Capabilities**:
+- Creating detailed product plans with prioritized features and clear timelines
+- Developing product vision and strategy
+- Performing market and competitive analysis
+- Defining user stories and requirements
+- Managing cross-functional team collaboration
+- Implementing data-driven decision making
+
+**Parameters**:
+
+| Parameter | Description | Default Value |
+|-----------|-------------|---------------|
+| `from_file` | Path to the file containing the product requirements | *required* |
+| `models_prefixed_by_provider` | Models to use in format "provider:model" | `openai:gpt-4o-mini` |
+| `output_path` | Full path for the output document | Generated based on input |
+| `output_dir` | Directory for response files | input file's directory/responses |
+| `output_extension` | File extension for output files | `md` |
+| `use_decision_maker` | Whether to use team decision making | `false` |
+| `decision_maker_models` | Models for team members if using decision maker | `["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:gemini-2.5-pro"]` |
+| `decision_maker_model` | Model for final decision making | `openai:gpt-4o-mini` |
+| `pm_prompt` | Custom Product Manager prompt template | Default template |
+| `decision_maker_prompt` | Custom decision maker prompt template | Default template |
+
+**Examples**:
+```bash
+# Simple example
+persona_pm_tool: "prompts/responses/concept.md" "[g:gemini-2.5-pro-preview-03-25]" "prompts/responses/prd.md"
+
+# Complex example with team-based decision making
+persona_pm_tool: "prompts/responses/concept.md" use_decision_maker=true decision_maker_model="o:gpt-4o-mini" "prompts/responses/prd.md"
 ```
