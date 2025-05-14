@@ -22,7 +22,7 @@ def persona_pm(
     decision_maker_models: Optional[List[str]] = None,
     pm_prompt: str = DEFAULT_PM_PROMPT,
     decision_maker_model: str = DEFAULT_DECISION_MAKER_MODEL,
-    decision_maker_prompt: str = DEFAULT_PERSONA_PROMPT
+    decision_maker_prompt: str = DEFAULT_PM_DECISION_PROMPT
 ) -> str:
     """
     Product Manager persona implementation.
