@@ -8,3 +8,6 @@ DEFAULT_TEAM_MODELS = ["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:
 
 # Default decision maker model
 DEFAULT_DECISION_MAKER_MODEL = "openai:gpt-4o-mini"
+
+# Default Product Manager prompt
+DEFAULT_PM_PROMPT = "pm_prompt.md"

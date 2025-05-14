@@ -11,6 +11,7 @@ from agile_team.tools.list_providers import list_providers
 from agile_team.tools.list_models import list_models
 from agile_team.tools.persona_dm import persona_dm, DEFAULT_PERSONA_PROMPT
 from agile_team.tools.persona_ba import persona_ba, DEFAULT_BA_PROMPT, DEFAULT_BA_DECISION_PROMPT
+from agile_team.tools.persona_pm import persona_pm, DEFAULT_PM_PROMPT, DEFAULT_PM_DECISION_PROMPT
 
 # Import centralized configuration
 from agile_team.shared.config import DEFAULT_MODEL, DEFAULT_TEAM_MODELS, DEFAULT_DECISION_MAKER_MODEL
@@ -195,6 +196,57 @@ def persona_ba_tool(
         use_decision_maker=use_decision_maker,
         decision_maker_models=decision_maker_models,
         ba_prompt=ba_prompt,
+        decision_maker_model=decision_maker_model,
+        decision_maker_prompt=decision_maker_prompt
+    )
+
+
+@mcp.tool()
+def persona_pm_tool(
+    from_file: str,
+    models_prefixed_by_provider: Optional[List[str]] = None,
+    output_dir: Optional[str] = None,
+    output_extension: Optional[str] = None,
+    output_path: Optional[str] = None,
+    use_decision_maker: bool = False,
+    decision_maker_models: Optional[List[str]] = None,
+    pm_prompt: str = DEFAULT_PM_PROMPT,
+    decision_maker_model: str = DEFAULT_DECISION_MAKER_MODEL,
+    decision_maker_prompt: str = DEFAULT_PM_DECISION_PROMPT
+) -> str:
+    """
+    Generate product management plans using a specialized Product Manager persona, with optional decision making.
+    
+    This tool uses a specialized Product Manager prompt to create comprehensive product plans
+    from a file. It can either use a single model or leverage the team decision-making
+    functionality to get multiple perspectives and consolidate them.
+    
+    Args:
+        from_file: Path to the file containing the product requirements
+        models_prefixed_by_provider: List of models in format "provider:model"
+                                    (if None, defaults to DEFAULT_MODEL)
+        output_dir: Directory where response files should be saved (defaults to input file's directory/responses)
+        output_extension: File extension for output files (e.g., 'py', 'txt', 'md')
+        output_path: Optional full output path with filename for the output document
+        use_decision_maker: Whether to use the decision maker functionality
+        decision_maker_models: Models to use if use_decision_maker is True
+                             (if None, defaults to DEFAULT_TEAM_MODELS)
+        pm_prompt: Custom product manager prompt template
+        decision_maker_model: Model to use for decision making (defaults to DEFAULT_DECISION_MAKER_MODEL)
+        decision_maker_prompt: Custom persona prompt template for decision making
+    
+    Returns:
+        Path to the product plan output file
+    """
+    return persona_pm(
+        from_file=from_file,
+        models_prefixed_by_provider=models_prefixed_by_provider,
+        output_dir=output_dir,
+        output_extension=output_extension,
+        output_path=output_path,
+        use_decision_maker=use_decision_maker,
+        decision_maker_models=decision_maker_models,
+        pm_prompt=pm_prompt,
         decision_maker_model=decision_maker_model,
         decision_maker_prompt=decision_maker_prompt
     )
