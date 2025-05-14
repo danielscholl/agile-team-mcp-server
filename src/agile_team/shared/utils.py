@@ -1,6 +1,7 @@
 """Utility functions for the Agile Team MCP Server."""
 
 import os
+import pathlib
 from typing import Dict, List, Tuple, Optional
 from mcp.server.fastmcp.exceptions import ValidationError, ToolError, ResourceError
 import json
@@ -155,3 +156,34 @@ def weak_provider_and_model(provider: str, model: str, available_models: List[st
             return corrected_provider, available_models[0]
     
     return corrected_provider, model
+
+
+def load_prompt_file(prompt_file: str, relative_path: str = "tools/prompts") -> str:
+    """
+    Load a prompt template from a file.
+    
+    Args:
+        prompt_file: The name of the prompt file to load
+        relative_path: The relative path to the prompts directory (from src/agile_team)
+        
+    Returns:
+        The prompt template as a string
+        
+    Raises:
+        ResourceError: If the prompt file cannot be loaded
+    """
+    # Get the path to the agile_team module
+    module_path = pathlib.Path(__file__).parent.parent.absolute()
+    
+    # Construct the path to the prompt file
+    prompt_path = module_path / relative_path / prompt_file
+    
+    # Check if the file exists
+    if not os.path.exists(prompt_path):
+        raise ResourceError(f"Prompt file not found: {prompt_path}")
+    
+    # Read the prompt file
+    try:
+        return read_file(str(prompt_path))
+    except ResourceError as e:
+        raise ResourceError(f"Failed to load prompt file {prompt_file}: {str(e)}")

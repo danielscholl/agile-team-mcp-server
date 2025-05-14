@@ -10,7 +10,7 @@ from agile_team.tools.prompt_from_file_to_file import prompt_from_file_to_file
 from agile_team.tools.list_providers import list_providers
 from agile_team.tools.list_models import list_models
 from agile_team.tools.persona_dm import persona_dm, DEFAULT_PERSONA_PROMPT
-from agile_team.tools.persona_ba import persona_ba, DEFAULT_BA_PROMPT
+from agile_team.tools.persona_ba import persona_ba, DEFAULT_BA_PROMPT, DEFAULT_BA_DECISION_PROMPT
 
 # Import centralized configuration
 from agile_team.shared.config import DEFAULT_MODEL, DEFAULT_TEAM_MODELS, DEFAULT_DECISION_MAKER_MODEL
@@ -160,7 +160,7 @@ def persona_ba_tool(
     decision_maker_models: Optional[List[str]] = None,
     ba_prompt: str = DEFAULT_BA_PROMPT,
     decision_maker_model: str = DEFAULT_DECISION_MAKER_MODEL,
-    decision_maker_prompt: str = DEFAULT_PERSONA_PROMPT
+    decision_maker_prompt: str = DEFAULT_BA_DECISION_PROMPT
 ) -> str:
     """
     Generate business analysis using a specialized Business Analyst persona, with optional decision making.

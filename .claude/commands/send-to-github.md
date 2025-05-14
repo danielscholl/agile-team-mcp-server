@@ -8,4 +8,4 @@ Before_Start:
 On_Complete:
 - GIT: commit with a descriptive message.
 - GIT: push the branch to the remote repository.
-- gh: create a PR.
+- gh: create a PR with issue linked.
