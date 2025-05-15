@@ -8,7 +8,7 @@ A team of Agent Personas wrapped in an MCP server that has the ability to levera
 - **Provider/Model Correction**: Automatically correct and validate provider and model names
 - **File Support**: Send prompts from files and save responses to files
 - **Provider/Model Discovery**: List available providers and models
-- **Persona Tools**: Specialized personas like Business Analyst and Team Decision Maker
+- **Persona Tools**: Specialized personas like Business Analyst, Product Manager, Spec Writer, and Team Decision Maker
 
 ## Setup
 
@@ -346,4 +346,40 @@ persona_pm_tool: "prompts/responses/project-brief.md" "prompts/responses/project
 
 # Complex example with team-based decision making
 persona_pm_tool: "prompts/responses/project-brief.md" use_decision_maker=true decision_maker_model="o:gpt-4o-mini" "prompts/responses/project-prd.md"
+```
+
+### Spec Writer Persona
+
+Generate clear, developer-ready specification documents from PRDs, project briefs, or user requests using a specialized Spec Writer persona.
+
+**Capabilities**:
+- Producing technical specifications from PRDs or project briefs
+- Defining step-by-step implementation instructions for developers and AI agents
+- Creating comprehensive specifications with architectural patterns and validation criteria
+- Defining tool behavior, CLI structure, directory layout, and testing plans
+- Using focused, reproducible examples to communicate architectural patterns
+- Ensuring each spec includes validation steps to verify implementation
+
+**Parameters**:
+
+| Parameter | Description | Default Value |
+|-----------|-------------|---------------|
+| `from_file` | Path to the file containing requirements or PRD | *required* |
+| `models_prefixed_by_provider` | Models to use in format "provider:model" | `openai:gpt-4o-mini` |
+| `output_path` | Full path for the output document | Generated based on input |
+| `output_dir` | Directory for response files | input file's directory/responses |
+| `output_extension` | File extension for output files | `md` |
+| `use_decision_maker` | Whether to use team decision making | `false` |
+| `decision_maker_models` | Models for team members if using decision maker | `["openai:gpt-4.1", "anthropic:claude-3-7-sonnet", "gemini:gemini-2.5-pro"]` |
+| `decision_maker_model` | Model for final decision making | `openai:gpt-4o-mini` |
+| `sw_prompt` | Custom Spec Writer prompt template | Default template |
+| `decision_maker_prompt` | Custom decision maker prompt template | Default template |
+
+**Examples**:
+```bash
+# Simple example - generate a specification from a PRD
+persona_sw_tool: "prompts/responses/project-prd.md" "prompts/responses/project-spec.md"
+
+# Complex example with team-based decision making
+persona_sw_tool: "prompts/responses/project-prd.md" use_decision_maker=true decision_maker_model=["o:gpt-4o-mini"] "prompts/responses/project-spec.md"
 ```
