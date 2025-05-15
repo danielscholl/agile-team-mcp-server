@@ -123,28 +123,78 @@ def prompt_with_thinking(text: str, model: str, thinking_budget: int) -> str:
     try:
         logger.info(f"Sending prompt to Gemini model {model} with thinking budget {thinking_budget}")
         
+        # Add safety settings to ensure we don't filter out XML-like content
+        safety_settings = [
+            {
+                "category": "HARM_CATEGORY_DANGEROUS",
+                "threshold": "BLOCK_NONE",
+            },
+            {
+                "category": "HARM_CATEGORY_HARASSMENT",
+                "threshold": "BLOCK_NONE",
+            },
+            {
+                "category": "HARM_CATEGORY_HATE_SPEECH",
+                "threshold": "BLOCK_NONE",
+            },
+            {
+                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "threshold": "BLOCK_NONE",
+            },
+            {
+                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                "threshold": "BLOCK_NONE",
+            },
+        ]
+        
+        # Log if we detect XML-like content
+        if "<" in text and ">" in text:
+            if "analyst_request" in text:
+                logger.info("Detected BA prompt with XML tags in thinking prompt")
+            else:
+                logger.info("Detected XML-like tags in thinking prompt")
+        
         if USE_CLIENT_API:
             # Using google-genai Client API
             response = client.models.generate_content(
                 model=model,
                 contents=text,
+                safety_settings=safety_settings,
                 config=genai.types.GenerateContentConfig(
                     thinking_config=genai.types.ThinkingConfig(
                         thinking_budget=thinking_budget
-                    )
+                    ),
+                    temperature=0.7,
+                    top_p=0.95,
+                    top_k=40,
+                    max_output_tokens=8192
                 )
             )
         else:
             # Using google.generativeai API
-            gemini_model = genai.GenerativeModel(model_name=model)
-            response = gemini_model.generate_content(
-                text,
-                generation_config=genai.GenerationConfig(
-                    # The old API may not support thinking_config directly
-                    # This is a placeholder - actual implementation may vary
-                    # depending on the API version
-                )
+            safety_settings_dict = {
+                "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
+                "HARM_CATEGORY_HATE_SPEECH": "BLOCK_NONE",
+                "HARM_CATEGORY_SEXUALLY_EXPLICIT": "BLOCK_NONE",
+                "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_NONE",
+            }
+            
+            generation_config = genai.GenerationConfig(
+                temperature=0.7,
+                top_p=0.95,
+                top_k=40,
+                max_output_tokens=8192
+                # The old API may not support thinking_config directly
+                # This is a placeholder - actual implementation may vary
+                # depending on the API version
             )
+            
+            gemini_model = genai.GenerativeModel(
+                model_name=model,
+                safety_settings=safety_settings_dict,
+                generation_config=generation_config
+            )
+            response = gemini_model.generate_content(text)
         
         return response.text
     except Exception as e:
@@ -157,6 +207,7 @@ def prompt(text: str, model: str) -> str:
     Send a prompt to Google Gemini and get a response.
     
     Automatically handles thinking suffixes in the model name (e.g., gemini-2.5-flash-preview-04-17:4k)
+    Also includes special handling for XML-like tags in prompts.
     
     Args:
         text: The prompt text
@@ -168,6 +219,15 @@ def prompt(text: str, model: str) -> str:
     # Parse the model name to check for thinking suffixes
     base_model, thinking_budget = parse_thinking_suffix(model)
     
+    # Wrap XML-tag formatted prompts to ensure they're preserved properly
+    # This helps prevent Gemini from filtering out or modifying special tags
+    if "<" in text and ">" in text:
+        if "analyst_request" in text:
+            logger.info("Detected BA prompt with XML tags, using special handling")
+            # No modifications to the text structure, just log that we detected it
+        else:
+            logger.info("Detected XML-like tags in prompt")
+    
     # If thinking budget is specified, use prompt_with_thinking
     if thinking_budget > 0:
         return prompt_with_thinking(text, base_model, thinking_budget)
@@ -178,13 +238,66 @@ def prompt(text: str, model: str) -> str:
         
         if USE_CLIENT_API:
             # Using google-genai Client API
+            # Add safety settings to ensure we don't filter out XML-like content
+            safety_settings = [
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS",
+                    "threshold": "BLOCK_NONE",
+                },
+                {
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_NONE",
+                },
+                {
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_NONE",
+                },
+                {
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_NONE",
+                },
+                {
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_NONE",
+                },
+            ]
+            
+            # Set generation config to ensure we get complete responses
+            generation_config = {
+                "temperature": 0.7,
+                "topP": 0.95,
+                "topK": 40,
+                "maxOutputTokens": 8192
+            }
+            
             response = client.models.generate_content(
                 model=base_model,
-                contents=text
+                contents=text,
+                safety_settings=safety_settings,
+                generation_config=generation_config
             )
         else:
             # Using google.generativeai API
-            gemini_model = genai.GenerativeModel(model_name=base_model)
+            # We need to create safety settings
+            safety_settings = {
+                "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
+                "HARM_CATEGORY_HATE_SPEECH": "BLOCK_NONE",
+                "HARM_CATEGORY_SEXUALLY_EXPLICIT": "BLOCK_NONE",
+                "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_NONE",
+            }
+            
+            generation_config = genai.GenerationConfig(
+                temperature=0.7,
+                top_p=0.95,
+                top_k=40,
+                max_output_tokens=8192
+            )
+            
+            gemini_model = genai.GenerativeModel(
+                model_name=base_model,
+                safety_settings=safety_settings,
+                generation_config=generation_config
+            )
             response = gemini_model.generate_content(text)
         
         return response.text

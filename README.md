@@ -306,10 +306,10 @@ Generate detailed business analysis using a specialized Business Analyst persona
 **Examples**:
 ```bash
 # Simple example
-persona_ba_tool: "prompts/concept.md" "[g:gemini-2.5-pro-preview-03-25]" "prompts/responses/concept.md"
+persona_ba_tool: "prompts/concept.md" "prompts/responses/project-brief.md"
 
 # Complex example with team-based decision making
-persona_ba_tool: "prompts/concept.md" use_decision_maker=true decision_maker_model="o:04-mini" "prompts/responses/concept.md"
+persona_ba_tool: "prompts/concept.md" use_decision_maker=true decision_maker_model="o:04-mini" "prompts/responses/project-brief.md"
 ```
 
 ### Product Manager Persona
@@ -342,8 +342,8 @@ Generate comprehensive product management plans using a specialized Product Mana
 **Examples**:
 ```bash
 # Simple example
-persona_pm_tool: "prompts/responses/concept.md" "[g:gemini-2.5-pro-preview-03-25]" "prompts/responses/prd.md"
+persona_pm_tool: "prompts/responses/project-brief.md" "prompts/responses/project-prd.md"
 
 # Complex example with team-based decision making
-persona_pm_tool: "prompts/responses/concept.md" use_decision_maker=true decision_maker_model="o:gpt-4o-mini" "prompts/responses/prd.md"
+persona_pm_tool: "prompts/responses/project-brief.md" use_decision_maker=true decision_maker_model="o:gpt-4o-mini" "prompts/responses/project-prd.md"
 ```

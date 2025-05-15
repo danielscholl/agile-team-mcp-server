@@ -74,7 +74,7 @@ def persona_base(
         raise ResourceError(f"Failed to read input file: {str(e)}")
     
     # Format the persona prompt with the input content
-    formatted_prompt = persona_prompt.format(analyst_request=input_content)
+    formatted_prompt = persona_prompt.format(request_data=input_content)
     
     if use_decision_maker:
         # Use the decision maker workflow
