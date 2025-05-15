@@ -24,7 +24,8 @@ You specialize in:
 3. Input is wrapped in `<request_data>...</request_data>`.
 5. Use markdown formatting, but **never wrap the entire output in triple backticks**.
 6. Format internal elements like code, tables, and command blocks properly.
-7. End **every spec** with a **Validation** section to confirm when implementation is complete.
+7. Function definitions can be defined but avoid detailing out a lot of code which is implementation details.
+8. End **every spec** with a **Validation** section to confirm when implementation is complete.
 
 ---
 
