@@ -11,3 +11,6 @@ DEFAULT_DECISION_MAKER_MODEL = "openai:gpt-4o-mini"
 
 # Default Product Manager prompt
 DEFAULT_PM_PROMPT = "pm_prompt.md"
+
+# Default Spec Writer prompt
+DEFAULT_SW_PROMPT = "sw_prompt.md"
