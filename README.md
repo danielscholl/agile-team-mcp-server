@@ -149,6 +149,32 @@ With a compatible MCP client, you can connect to the server:
 mcp use agile-team
 ```
 
+## Available Prompts
+
+Interactive conversation starters and guided workflows to help you discover and use server capabilities.
+
+### List MCP Assets
+
+Get a comprehensive overview of all server capabilities including tools, personas, providers, and workflows.
+
+**Parameters**: None required
+
+**Usage**:
+```bash
+# Get complete server capability overview
+list_mcp_assets
+```
+
+**Returns**: Comprehensive markdown documentation including:
+- All available tools with parameters and examples
+- Supported LLM providers with shortcuts and usage examples  
+- Agent personas (Business Analyst, Product Manager, Spec Writer, Decision Maker)
+- Quick start workflows for agile team processes
+- Advanced usage patterns and best practices
+- Pro tips for model selection and workflow optimization
+
+This prompt provides a self-documenting overview of the entire agile-team MCP server, making it easy to discover capabilities and get started with productive workflows.
+
 ## Available Tools
 
 ### List Available Options

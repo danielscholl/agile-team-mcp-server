@@ -302,3 +302,171 @@ def persona_sw_tool(
         decision_maker_model=decision_maker_model,
         decision_maker_prompt=decision_maker_prompt
     )
+
+
+@mcp.prompt()
+def list_mcp_assets() -> str:
+    """
+    List MCP Assets prompt for comprehensive server capability overview.
+
+    Provides dynamic listing of all available prompts, tools, and resources
+    with usage examples and quick start guidance.
+    """
+    
+    content = """# 🚀 Agile Team MCP Server Assets
+
+## 📝 Prompts
+Interactive conversation starters and guided workflows:
+
+• **list_mcp_assets** () - Comprehensive overview of all server capabilities
+
+## 🔧 Tools
+Agent persona management and LLM provider integration functions:
+
+### Core Prompt Tools
+• **prompt_tool** (text, models_prefixed_by_provider) - Send text prompts to multiple LLM models
+• **prompt_from_file_tool** (file_path, models_prefixed_by_provider) - Send prompts from files to models
+• **prompt_from_file2file_tool** (file_path, models_prefixed_by_provider, output_dir, output_extension, output_path) - Process prompts from files and save responses
+
+### Provider Discovery
+• **list_providers_tool** () - List all supported LLM providers with shortcuts
+• **list_models_tool** (provider) - List available models for a specific provider
+
+### Agent Personas
+• **persona_ba_tool** (from_file, models_prefixed_by_provider, use_decision_maker, ...) - Business Analyst persona for project briefs and requirements
+• **persona_pm_tool** (from_file, models_prefixed_by_provider, use_decision_maker, ...) - Product Manager persona for PRDs and product plans
+• **persona_sw_tool** (from_file, models_prefixed_by_provider, use_decision_maker, ...) - Spec Writer persona for technical specifications
+• **persona_dm_tool** (from_file, models_prefixed_by_provider, persona_dm_model, ...) - Team Decision Maker for multi-model consensus
+
+---
+
+## 🏢 Supported LLM Providers
+
+| Provider | Short Prefix | Full Prefix | Example Usage |
+|----------|--------------|-------------|--------------|
+| OpenAI   | `o`          | `openai`    | `o:gpt-4o-mini` |
+| Anthropic | `a`         | `anthropic` | `a:claude-3-5-haiku` |
+| Google Gemini | `g`     | `gemini`    | `g:gemini-2.5-pro-exp` |
+| Groq     | `q`          | `groq`      | `q:llama-3.1-70b-versatile` |
+| DeepSeek | `d`          | `deepseek`  | `d:deepseek-coder` |
+| Ollama   | `l`          | `ollama`    | `l:llama3.1` |
+
+---
+
+## 🎯 Quick Start Agile Team Workflow
+
+### Business Analysis → Product Management → Specification
+
+1. **Analyze Business Requirements**
+   ```
+   Use tool: persona_ba_tool
+   Arguments: from_file="requirements/concept.md"
+   Result: Comprehensive project brief with MVP scope and business analysis
+   ```
+
+2. **Create Product Plan**
+   ```
+   Use tool: persona_pm_tool
+   Arguments: from_file="responses/project-brief.md"
+   Result: Detailed PRD with features, timelines, and success metrics
+   ```
+
+3. **Generate Technical Specification**
+   ```
+   Use tool: persona_sw_tool
+   Arguments: from_file="responses/project-prd.md"
+   Result: Developer-ready specification with implementation details
+   ```
+
+4. **Team Decision Making**
+   ```
+   Use tool: persona_dm_tool
+   Arguments: from_file="requirements/decision.md", models_prefixed_by_provider=["o:gpt-4.1", "a:claude-3-7-sonnet", "g:gemini-2.5-pro"]
+   Result: Multi-model analysis with final decision and reasoning
+   ```
+
+---
+
+## 🔄 Advanced Workflows
+
+### Multi-Model Analysis Pattern
+Send the same prompt to multiple models for comparison:
+```bash
+# Compare responses across providers
+prompt_tool: "Analyze the trade-offs between microservices and monoliths" ["o:gpt-4.1", "a:claude-3-7-sonnet", "g:gemini-2.5-pro"]
+```
+
+### Team-Based Persona Decision Making
+Enable team decision making for any persona:
+```bash
+# Business Analysis with team consensus
+persona_ba_tool: "requirements.md" use_decision_maker=true decision_maker_models=["o:gpt-4.1", "a:claude-3-7-sonnet", "g:gemini-2.5-pro"]
+```
+
+### File-to-File Processing
+Process prompts from files and automatically save responses:
+```bash
+# Batch process multiple prompts
+prompt_from_file2file_tool: "prompts/architecture.md" ["a:claude-3-7-sonnet"] output_extension="md"
+```
+
+---
+
+## 💡 Pro Tips
+
+### Model Selection Strategy
+• **Quick Iterations**: Use `o:gpt-4o-mini` or `a:claude-3-5-haiku` for fast responses
+• **Deep Analysis**: Use `o:gpt-4.1`, `a:claude-3-7-sonnet`, or `g:gemini-2.5-pro` for comprehensive work
+• **Reasoning Tasks**: Add `:high` to OpenAI models (e.g., `o:gpt-4.1:high`) for enhanced reasoning
+• **Thinking Tokens**: Add `:4k` for extended thinking (e.g., `a:claude-3-7-sonnet:4k`)
+
+### Persona Workflow Optimization
+• **Start with BA**: Always begin with Business Analyst for clear requirements
+• **PM for Structure**: Use Product Manager to organize features and priorities
+• **SW for Implementation**: Spec Writer provides developer-ready technical details
+• **DM for Consensus**: Decision Maker synthesizes multiple expert perspectives
+
+### File Organization
+• **Input Structure**: Place requirements in `prompts/` or dedicated directories
+• **Output Management**: Responses automatically organized in `responses/` subdirectories
+• **Traceability**: Maintain clear file naming for workflow continuity
+
+### Best Practices
+• **Phase-Based Development**: Follow BA → PM → SW → Implementation pipeline
+• **Multi-Model Validation**: Use team decision making for critical decisions
+• **Provider Diversity**: Leverage different models' strengths for specialized tasks
+• **Version Control**: Track iterations of requirements, PRDs, and specifications
+
+---
+
+## 📊 Persona Capabilities
+
+### Business Analyst
+• **Project Briefs**: Transform concepts into structured business requirements
+• **MVP Definition**: Define minimum viable product scope and features
+• **Market Analysis**: Analyze target users and business opportunities
+• **Risk Assessment**: Identify constraints, assumptions, and potential blockers
+
+### Product Manager
+• **PRD Creation**: Develop comprehensive Product Requirements Documents
+• **Feature Prioritization**: Organize features by business value and impact
+• **Success Metrics**: Define measurable outcomes and KPIs
+• **Technical Handoff**: Prepare requirements for development teams
+
+### Spec Writer
+• **Technical Specifications**: Create developer-ready implementation guides
+• **Architecture Patterns**: Define system structure and component interactions
+• **Validation Criteria**: Establish testing and acceptance requirements
+• **Implementation Steps**: Provide detailed development instructions
+
+### Decision Maker
+• **Multi-Model Analysis**: Synthesize insights from multiple AI perspectives
+• **Consensus Building**: Evaluate different approaches and choose optimal solutions
+• **Risk Assessment**: Analyze trade-offs across multiple dimensions
+• **Rationale Documentation**: Provide clear reasoning for decisions
+
+---
+
+**🚀 Ready to build your next project? Start with `persona_ba_tool` to analyze your business requirements!**"""
+
+    return content
